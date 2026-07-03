@@ -200,42 +200,47 @@
 </main>
 
 <script>
-const PLAYERS = [
-  {name:"AkaDelaFontaine", pos:"Milieu",    ovr:75, gp:16,   goals:1,    assists:3,   passes:192,   passpct:80, tackles:31,   tklpct:50, winpct:56},
-  {name:"Backtothebando93",pos:"Attaquant", ovr:87, gp:377,  goals:164,  assists:93,  passes:4803,  passpct:84, tackles:244,  tklpct:22, winpct:54},
-  {name:"bankachor95",     pos:"Milieu",    ovr:86, gp:1011, goals:856,  assists:735, passes:16869, passpct:79, tackles:1059, tklpct:30, winpct:49},
-  {name:"callighost",      pos:"Milieu",    ovr:84, gp:758,  goals:89,   assists:301, passes:14508, passpct:81, tackles:549,  tklpct:21, winpct:48},
-  {name:"fosseauxlions",   pos:"Milieu",    ovr:70, gp:65,   goals:12,   assists:35,  passes:926,   passpct:75, tackles:54,   tklpct:19, winpct:63},
-  {name:"Hardebaran",      pos:"Attaquant", ovr:83, gp:181,  goals:16,   assists:8,   passes:1729,  passpct:84, tackles:173,  tklpct:25, winpct:53},
-  {name:"Kaz_229_",        pos:"Milieu",    ovr:89, gp:191,  goals:52,   assists:211, passes:3489,  passpct:78, tackles:264,  tklpct:15, winpct:55},
-  {name:"MambaNoir_07",    pos:"Attaquant", ovr:87, gp:1038, goals:1439, assists:518, passes:19447, passpct:85, tackles:850,  tklpct:37, winpct:50},
-  {name:"nll_abk",         pos:"Milieu",    ovr:76, gp:60,   goals:22,   assists:17,  passes:701,   passpct:82, tackles:33,   tklpct:8,  winpct:41},
-  {name:"saint_yaane",     pos:"Attaquant", ovr:87, gp:9,    goals:7,    assists:3,   passes:133,   passpct:85, tackles:5,    tklpct:11, winpct:66},
-  {name:"Sems1509",        pos:"Milieu",    ovr:80, gp:13,   goals:0,    assists:1,   passes:132,   passpct:79, tackles:6,    tklpct:24, winpct:38},
+/* Données de secours (fallback) si data.json est indisponible.
+   En temps normal elles sont remplacées au chargement par data.json,
+   généré depuis l'API EA (voir scripts/fetch-stats.mjs). */
+let PLAYERS = [
+  {name:"AkaDelaFontaine",pos:"Milieu",ovr:75,gp:16,goals:1,assists:3,passes:192,passpct:80,tackles:31,tklpct:50,winpct:56,rating:8,shotpct:100,motm:4,reds:0,form:[0,0,0,0,0,0,1,0,0,0]},
+  {name:"Backtothebando93",pos:"Attaquant",ovr:87,gp:377,goals:164,assists:93,passes:4803,passpct:84,tackles:244,tklpct:22,winpct:54,rating:7.2,shotpct:33,motm:22,reds:0,form:[3,7,3,11,6,3,7,1,0,2]},
+  {name:"bankachor95",pos:"Milieu",ovr:86,gp:1011,goals:856,assists:735,passes:16869,passpct:79,tackles:1059,tklpct:30,winpct:49,rating:8,shotpct:42,motm:172,reds:2,form:[10,11,4,11,12,10,13,8,13,14]},
+  {name:"callighost",pos:"Milieu",ovr:84,gp:758,goals:89,assists:301,passes:14508,passpct:81,tackles:549,tklpct:21,winpct:48,rating:7.5,shotpct:26,motm:37,reds:1,form:[2,1,0,1,1,1,2,1,1,1]},
+  {name:"fosseauxlions",pos:"Milieu",ovr:70,gp:65,goals:12,assists:35,passes:926,passpct:75,tackles:54,tklpct:19,winpct:63,rating:7.2,shotpct:26,motm:0,reds:0,form:[0,1,1,4,2,1,0,1,1,0]},
+  {name:"Hardebaran",pos:"Attaquant",ovr:83,gp:181,goals:16,assists:8,passes:1729,passpct:84,tackles:173,tklpct:25,winpct:53,rating:6.7,shotpct:20,motm:4,reds:1,form:[4,0,1,3,0,2,2,1,0,0]},
+  {name:"Kaz_229_",pos:"Milieu",ovr:89,gp:191,goals:52,assists:211,passes:3489,passpct:78,tackles:264,tklpct:15,winpct:55,rating:8,shotpct:32,motm:20,reds:1,form:[3,2,4,2,2,3,1,3,3,5]},
+  {name:"MambaNoir_07",pos:"Attaquant",ovr:87,gp:1038,goals:1439,assists:518,passes:19447,passpct:85,tackles:850,tklpct:37,winpct:50,rating:8.3,shotpct:38,motm:288,reds:0,form:[22,29,28,29,16,33,18,22,26,18]},
+  {name:"nll_abk",pos:"Milieu",ovr:76,gp:60,goals:22,assists:17,passes:701,passpct:82,tackles:33,tklpct:8,winpct:41,rating:6.9,shotpct:30,motm:2,reds:0,form:[1,3,2,2,0,2,3,1,3,0]},
+  {name:"saint_yaane",pos:"Attaquant",ovr:87,gp:9,goals:7,assists:3,passes:133,passpct:85,tackles:5,tklpct:11,winpct:66,rating:7.7,shotpct:43,motm:2,reds:0,form:[2,3,1,2,0,0,0,0,0,0]},
+  {name:"Sems1509",pos:"Milieu",ovr:80,gp:13,goals:0,assists:1,passes:132,passpct:79,tackles:6,tklpct:24,winpct:38,rating:6.3,shotpct:0,motm:0,reds:0,form:[0,0,0,0,0,0,0,0,0,0]},
 ];
 
 const state = {tab:"players", sel:0, perMatch:false, metric:"goals", cmpA:7, cmpB:2};
 
 const tier = o => o>=87 ? "elite" : o>=75 ? "gold" : "silver";
 const initials = n => (n.replace(/[^A-Za-z]/g,"").slice(0,2).toUpperCase()) || "??";
-const fmtN = n => Number.isInteger(n) ? n.toLocaleString('fr-FR') : n.toFixed(2).replace('.',',');
+const fmtN = n => (n==null||Number.isNaN(n)) ? "—" : (Number.isInteger(n) ? n.toLocaleString('fr-FR') : parseFloat(n.toFixed(2)).toLocaleString('fr-FR',{maximumFractionDigits:2}));
 const avg = k => Math.round(PLAYERS.reduce((s,p)=>s+p[k],0)/PLAYERS.length);
 const sum = k => PLAYERS.reduce((s,p)=>s+p[k],0);
 const ga = p => p.goals+p.assists;
-const isRate = k => ["ovr","passpct","tklpct","winpct","gp"].includes(k);
+const isRate = k => ["ovr","passpct","tklpct","winpct","gp","rating","shotpct"].includes(k);
 
 function val(p,key,pm){
-  if(isRate(key)) return p[key];
-  const raw = key==="ga" ? ga(p) : p[key];
+  if(isRate(key)) return p[key] ?? 0;
+  const raw = key==="ga" ? ga(p) : (p[key] ?? 0);
   return pm && p.gp ? raw/p.gp : raw;
 }
 const maxOf = (key,pm)=>Math.max(...PLAYERS.map(p=>val(p,key,pm)));
 const rankOf = (p,key,pm)=>{const v=val(p,key,pm);return PLAYERS.filter(x=>val(x,key,pm)>v).length+1;};
 
-document.getElementById('teamStrip').innerHTML = [
-  {v:avg('ovr'),l:"Note moyenne"},{v:fmtN(sum('goals')),l:"Buts cumulés"},
-  {v:fmtN(sum('assists')),l:"Passes déc."},{v:avg('winpct')+"%",l:"Victoires moy."},
-].map(t=>`<div class="tstat"><div class="v">${t.v}</div><div class="l">${t.l}</div></div>`).join('');
+function renderTeamStrip(){
+  document.getElementById('teamStrip').innerHTML = [
+    {v:avg('ovr'),l:"Note moyenne"},{v:fmtN(sum('goals')),l:"Buts cumulés"},
+    {v:fmtN(sum('assists')),l:"Passes déc."},{v:avg('winpct')+"%",l:"Victoires moy."},
+  ].map(t=>`<div class="tstat"><div class="v">${t.v}</div><div class="l">${t.l}</div></div>`).join('');
+}
 
 /* radar */
 const AXES=[{key:"goals",label:"Attaque"},{key:"assists",label:"Créativité"},{key:"passes",label:"Passes"},{key:"tackles",label:"Défense"},{key:"winpct",label:"Victoires"}];
@@ -256,8 +261,21 @@ function radarSVG(players,pm,colors){
   return `<svg width="${S}" height="${S}" viewBox="0 0 ${S} ${S}" role="img" aria-label="Profil radar">${g}${sp}${lb}${po}</svg>`;
 }
 
+function sparklineSVG(form){
+  const f=(Array.isArray(form)&&form.length?form.slice(0,10):new Array(10).fill(0)).slice().reverse();
+  const mx=Math.max(1,...f),W=248,H=74,gap=6,n=f.length,bw=(W-gap*(n-1))/n;
+  const bars=f.map((v,i)=>{
+    const h=Math.max(2,Math.round(v/mx*(H-18))),x=i*(bw+gap),y=H-h;
+    return `<g><title>${v} but(s)</title><rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${bw.toFixed(1)}" height="${h}" rx="2" fill="url(#spark)"/>`+
+      `<text x="${(x+bw/2).toFixed(1)}" y="${(y-4).toFixed(1)}" fill="#94aaa1" font-size="9" font-family="Barlow Condensed" font-weight="600" text-anchor="middle">${v||''}</text></g>`;
+  }).join('');
+  return `<svg width="100%" viewBox="0 0 ${W} ${H}" role="img" aria-label="Buts sur les 10 derniers matchs" style="display:block">
+    <defs><linearGradient id="spark" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1fd07a"/><stop offset="1" stop-color="#00A651"/></linearGradient></defs>${bars}</svg>
+    <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--muted2);letter-spacing:1px;text-transform:uppercase;margin-top:4px"><span>+ ancien</span><span>+ récent</span></div>`;
+}
+
 function highlights(p){
-  const specs=[["goals","Meilleur buteur","Top buteur"],["assists","Meilleur passeur","Top passeur"],["passes","Maître à la relance","Top relanceur"],["tackles","Mur défensif","Top défenseur"],["winpct","Roi des victoires","Top % victoires"],["ovr","Meilleure note","Top note"]];
+  const specs=[["goals","Meilleur buteur","Top buteur"],["assists","Meilleur passeur","Top passeur"],["passes","Maître à la relance","Top relanceur"],["tackles","Mur défensif","Top défenseur"],["winpct","Roi des victoires","Top % victoires"],["ovr","Meilleure note","Top note"],["rating","Régularité d'élite","Top régularité"],["motm","Chouchou du public","Top hommes du match"]];
   const out=[];
   specs.forEach(([k,n1,n])=>{const r=rankOf(p,k,false);if(r<=3)out.push({r,txt:r===1?n1:n,gold:r===1});});
   if(p.gp>=10){const r=rankOf(p,"goals",true);if(r<=3)out.push({r:r+.5,txt:r===1?"Efficacité redoutable":"Top efficacité",gold:r===1});}
@@ -287,10 +305,10 @@ const modeToggle=()=>`<div class="seg" data-toggle><button data-pm="0" class="${
 
 /* PLAYERS */
 const GROUPS=[
-  {title:"Attaque",rows:[["goals","Buts",""],["assists","Passes décisives",""],["ga","Buts + passes",""]]},
+  {title:"Attaque",rows:[["goals","Buts",""],["assists","Passes décisives",""],["ga","Buts + passes",""],["shotpct","Tirs réussis","%"]]},
   {title:"Construction",rows:[["passes","Passes réussies",""],["passpct","Réussite passes","%"]]},
-  {title:"Défense",rows:[["tackles","Tacles réussis",""],["tklpct","Réussite tacles","%"]]},
-  {title:"Bilan",rows:[["gp","Matchs joués",""],["winpct","Victoires","%"]]},
+  {title:"Défense",rows:[["tackles","Tacles réussis",""],["tklpct","Réussite tacles","%"],["reds","Cartons rouges",""]]},
+  {title:"Bilan",rows:[["gp","Matchs joués",""],["winpct","Victoires","%"],["rating","Note moyenne",""],["motm","Homme du match",""]]},
 ];
 const rankPill=r=>`<span class="${r===1?'rank top':r<=3?'rank podium':'rank'}">${r===1?"1ᵉʳ du club":r+"ᵉ / 11"}</span>`;
 
@@ -320,6 +338,10 @@ function renderPlayers(){
           ${radarSVG([p],pm,['#1fd07a'])}
           <div class="chips" style="justify-content:center">${hls}</div>
         </div>
+        <div class="panel-card" style="margin-top:18px">
+          <div class="grp-title">Forme · buts sur 10 matchs</div>
+          ${sparklineSVG(p.form)}
+        </div>
       </div>
       <div class="breakdown">${groups}</div>
     </div>`;
@@ -331,6 +353,7 @@ const METRICS=[
   {key:"goals",label:"Buts",sfx:""},{key:"assists",label:"Passes déc.",sfx:""},{key:"ga",label:"Buts+passes",sfx:""},
   {key:"passes",label:"Passes",sfx:""},{key:"passpct",label:"% Passes",sfx:"%"},{key:"tackles",label:"Tacles",sfx:""},
   {key:"tklpct",label:"% Tacles",sfx:"%"},{key:"winpct",label:"% Victoires",sfx:"%"},{key:"ovr",label:"Note",sfx:""},{key:"gp",label:"Matchs",sfx:""},
+  {key:"rating",label:"Note moy.",sfx:""},{key:"shotpct",label:"% Tirs",sfx:"%"},{key:"motm",label:"Homme du match",sfx:""},
 ];
 function renderBoard(){
   const m=METRICS.find(x=>x.key===state.metric)||METRICS[0];
@@ -353,7 +376,7 @@ function renderBoard(){
 }
 
 /* COMPARE */
-const CMP=[["ovr","Note"],["gp","Matchs"],["goals","Buts"],["assists","Passes déc."],["ga","Buts+passes"],["passes","Passes"],["passpct","% passes"],["tackles","Tacles"],["tklpct","% tacles"],["winpct","% victoires"]];
+const CMP=[["ovr","Note"],["rating","Note moy."],["gp","Matchs"],["goals","Buts"],["assists","Passes déc."],["ga","Buts+passes"],["shotpct","% tirs"],["passes","Passes"],["passpct","% passes"],["tackles","Tacles"],["tklpct","% tacles"],["motm","Homme du match"],["reds","Cartons rouges"],["winpct","% victoires"]];
 function renderCompare(){
   const A=PLAYERS[state.cmpA], B=PLAYERS[state.cmpB], pm=state.perMatch;
   const rows=CMP.map(([k,label])=>{
@@ -376,7 +399,7 @@ function renderCompare(){
 }
 
 function animateBars(sel='#view .rs-bar i'){requestAnimationFrame(()=>document.querySelectorAll(sel).forEach(el=>el.style.width=el.dataset.w+"%"));}
-function render(){state.tab==="players"?renderPlayers():state.tab==="board"?renderBoard():renderCompare();}
+function render(){renderTeamStrip();state.tab==="players"?renderPlayers():state.tab==="board"?renderBoard():renderCompare();}
 
 document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));t.classList.add('active');state.tab=t.dataset.tab;render();}));
 
@@ -403,7 +426,22 @@ function exportCard(btn){
   }).catch(()=>{btn.textContent="Échec, réessaie";setTimeout(()=>btn.textContent=orig,2200);});
 }
 
-render();
+async function boot(){
+  try{
+    const res = await fetch('data.json?_='+Date.now(), {cache:'no-store'});
+    if(res.ok){
+      const data = await res.json();
+      if(Array.isArray(data.players) && data.players.length) PLAYERS = data.players;
+    }
+  }catch(e){ /* on garde le fallback intégré */ }
+  // sécuriser les index si le nombre de joueurs a changé
+  const n = PLAYERS.length;
+  state.sel  = Math.min(state.sel , n-1);
+  state.cmpA = Math.min(state.cmpA, n-1);
+  state.cmpB = Math.min(state.cmpB, n-1);
+  render();
+}
+boot();
 </script>
 </body>
 </html>
