@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bénin Boyz FC — Stats du club</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+  :root{
+    --bg:#07120f;--panel:#10231d;--line:rgba(255,255,255,.09);--line-strong:rgba(255,255,255,.16);
+    --text:#F3F1E9;--muted:#94aaa1;--muted2:#6d857c;
+    --green:#00A651;--green-soft:#1fd07a;--red:#E8112D;
+    --gold1:#F8DE86;--gold2:#D3A23F;--gold-deep:#7c5716;
+    --silver1:#E9EEF2;--silver2:#96A4AE;--silver-deep:#4a555c;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:radial-gradient(120% 60% at 50% -10%, #123128 0%, transparent 55%),linear-gradient(180deg,#07120f 0%,#060d0b 100%);
+    color:var(--text);font-family:'Inter',system-ui,sans-serif;min-height:100vh;-webkit-font-smoothing:antialiased;padding-bottom:70px;
+  }
+  .wrap{max-width:960px;margin:0 auto;padding:0 16px}
+
+  header.topbar{position:sticky;top:0;z-index:50;background:rgba(7,15,13,.85);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+  .topbar-in{display:flex;align-items:center;gap:12px;padding:12px 16px;max-width:960px;margin:0 auto}
+  .crest{width:42px;height:48px;flex:none;position:relative;border-radius:6px 6px 22px 22px/6px 6px 30px 30px;background:linear-gradient(180deg,#0e2a1f,#0a1c15);border:1.5px solid var(--gold2);display:grid;place-items:center;box-shadow:0 4px 16px rgba(0,0,0,.4);overflow:hidden}
+  .crest::before{content:"";position:absolute;left:0;top:0;bottom:0;width:32%;background:var(--green)}
+  .crest span{position:relative;font-family:'Anton';font-size:19px;color:var(--gold1);text-shadow:0 1px 2px rgba(0,0,0,.5)}
+  .club-name{font-family:'Barlow Condensed';font-weight:700;font-size:22px;letter-spacing:.5px;line-height:1;text-transform:uppercase}
+  .club-sub{font-size:11px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-top:3px}
+  .tag{margin-left:auto;font-family:'Barlow Condensed';font-weight:700;font-size:13px;letter-spacing:1px;color:#07120f;background:linear-gradient(180deg,var(--gold1),var(--gold2));padding:5px 11px;border-radius:100px;text-transform:uppercase;white-space:nowrap}
+
+  .hero{padding:24px 0 4px}
+  .eyebrow{font-family:'Barlow Condensed';font-weight:600;letter-spacing:3px;font-size:12px;color:var(--green-soft);text-transform:uppercase}
+  .hero h1{font-family:'Anton';font-size:clamp(32px,8.5vw,54px);line-height:.92;letter-spacing:.5px;text-transform:uppercase;margin:6px 0 4px}
+  .hero h1 em{font-style:normal;color:transparent;-webkit-text-stroke:1.4px var(--gold2)}
+  .hero p{color:var(--muted);font-size:14px;max-width:46ch}
+  .team-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:18px}
+  .tstat{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px;position:relative;overflow:hidden}
+  .tstat::after{content:"";position:absolute;inset:0 auto 0 0;width:3px;background:var(--green)}
+  .tstat .v{font-family:'Anton';font-size:24px;line-height:1}
+  .tstat .l{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:5px;line-height:1.25}
+
+  .tabs{display:flex;gap:6px;margin:26px 0 4px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:5px}
+  .tab{flex:1;font-family:'Barlow Condensed';font-weight:700;font-size:15px;letter-spacing:1.5px;text-transform:uppercase;padding:11px 6px;border-radius:10px;background:none;border:none;color:var(--muted);cursor:pointer;transition:.15s}
+  .tab:hover{color:var(--text)}
+  .tab.active{color:#07120f;background:linear-gradient(180deg,var(--gold1),var(--gold2))}
+  .tab:focus-visible{outline:2px solid var(--green-soft);outline-offset:2px}
+
+  .seg{display:inline-flex;background:var(--panel);border:1px solid var(--line);border-radius:100px;padding:4px;gap:2px}
+  .seg button{font-family:'Barlow Condensed';font-weight:600;font-size:13px;letter-spacing:1px;text-transform:uppercase;padding:7px 14px;border-radius:100px;background:none;border:none;color:var(--muted);cursor:pointer}
+  .seg button.on{color:#07120f;background:var(--green-soft)}
+  .seg button:focus-visible{outline:2px solid var(--green-soft);outline-offset:2px}
+
+  .sec-label{display:flex;align-items:center;gap:12px;margin:24px 0 14px;flex-wrap:wrap}
+  .sec-label h2{font-family:'Barlow Condensed';font-weight:700;font-size:15px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+  .sec-label .rule{height:1px;background:var(--line);flex:1;min-width:20px}
+
+  .picker{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+  @media(min-width:560px){.picker{grid-template-columns:repeat(3,1fr)}}
+  @media(min-width:820px){.picker{grid-template-columns:repeat(4,1fr)}}
+  .pchip{text-align:left;cursor:pointer;position:relative;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px;display:flex;align-items:center;gap:11px;transition:transform .16s,border-color .16s,background .16s;color:inherit;font:inherit}
+  .pchip:hover{transform:translateY(-2px);border-color:var(--line-strong)}
+  .pchip:focus-visible{outline:2px solid var(--green-soft);outline-offset:2px}
+  .pchip.active{border-color:var(--gold2);background:linear-gradient(180deg,#1a2c24,#12241d)}
+  .pchip.active::after{content:"";position:absolute;right:10px;top:10px;width:7px;height:7px;border-radius:50%;background:var(--green-soft);box-shadow:0 0 10px var(--green-soft)}
+  .pchip.pick2.active{border-color:var(--green)}
+  .ovr-badge{flex:none;width:40px;height:40px;border-radius:9px;display:grid;place-items:center;font-family:'Anton';font-size:18px;color:#20160a}
+  .ovr-badge.gold{background:linear-gradient(160deg,var(--gold1),var(--gold2))}
+  .ovr-badge.elite{background:linear-gradient(160deg,#FBEAA0,var(--gold2));box-shadow:0 0 0 1.5px var(--green) inset}
+  .ovr-badge.silver{background:linear-gradient(160deg,var(--silver1),var(--silver2));color:#1c2226}
+  .pchip .nm{font-family:'Barlow Condensed';font-weight:600;font-size:17px;line-height:1.05}
+  .pchip .ps{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:2px}
+
+  #view{margin-top:6px}
+  .detail-grid{display:grid;grid-template-columns:1fr;gap:22px;margin-top:6px}
+  @media(min-width:760px){.detail-grid{grid-template-columns:300px 1fr;align-items:start}}
+
+  .card{position:relative;border-radius:20px;padding:22px 20px 20px;overflow:hidden;background:linear-gradient(158deg,var(--gold1),#E7C568 34%,var(--gold2) 72%,var(--gold-deep));color:#22190a;box-shadow:0 24px 50px -18px rgba(0,0,0,.7);isolation:isolate}
+  .card.silver{background:linear-gradient(158deg,var(--silver1),#C4CED5 36%,var(--silver2) 74%,var(--silver-deep));color:#1a2024}
+  .card.elite{background:linear-gradient(158deg,#FBEEB4,#F0CE6E 30%,var(--gold2) 68%,#6f4d11)}
+  .card.elite::after{content:"";position:absolute;inset:0;border-radius:20px;border:2px solid rgba(0,166,81,.55);pointer-events:none;z-index:3}
+  .card .shine{position:absolute;top:-40%;left:-30%;width:60%;height:180%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.45),transparent);transform:rotate(18deg);z-index:2;pointer-events:none;animation:sweep 5.5s ease-in-out 1.2s infinite}
+  @keyframes sweep{0%,72%{left:-40%}88%,100%{left:120%}}
+  .card-top{display:flex;gap:12px;align-items:flex-start;position:relative;z-index:1}
+  .card-ovr{display:flex;flex-direction:column;align-items:center;line-height:1}
+  .card-ovr .n{font-family:'Anton';font-size:52px}
+  .card-ovr .p{font-family:'Barlow Condensed';font-weight:700;font-size:16px;letter-spacing:2px;margin-top:-2px}
+  .card-ovr .flag{margin-top:8px;width:34px;height:22px;border-radius:3px;overflow:hidden;display:flex;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+  .card-ovr .flag .g{width:38%;background:#008751}
+  .card-ovr .flag .yr{flex:1;display:flex;flex-direction:column}
+  .card-ovr .flag .yr .y{flex:1;background:#FCD116}
+  .card-ovr .flag .yr .r{flex:1;background:#E8112D}
+  .avatar{margin-left:auto;width:92px;height:92px;border-radius:50%;background:radial-gradient(circle at 50% 35%,rgba(255,255,255,.55),rgba(0,0,0,.12));display:grid;place-items:center;font-family:'Anton';font-size:34px;box-shadow:inset 0 0 0 2px rgba(0,0,0,.14)}
+  .card-name{position:relative;z-index:1;font-family:'Barlow Condensed';font-weight:700;font-size:28px;letter-spacing:.5px;text-transform:uppercase;text-align:center;margin:14px 0 12px;border-bottom:2px solid rgba(0,0,0,.22);padding-bottom:12px;line-height:1}
+  .card-mini{position:relative;z-index:1;display:grid;grid-template-columns:repeat(3,1fr);gap:6px;text-align:center}
+  .card-mini .cv{font-family:'Anton';font-size:22px;line-height:1}
+  .card-mini .cl{font-family:'Barlow Condensed';font-weight:600;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;opacity:.72;margin-top:3px}
+
+  .card-actions{display:flex;gap:8px;margin-top:12px}
+  .btn{font-family:'Barlow Condensed';font-weight:700;font-size:13px;letter-spacing:1px;text-transform:uppercase;padding:10px 12px;border-radius:10px;border:1px solid var(--line-strong);background:var(--panel);color:var(--text);cursor:pointer;transition:.15s;flex:1}
+  .btn:hover{border-color:var(--green);color:var(--green-soft)}
+  .btn:focus-visible{outline:2px solid var(--green-soft);outline-offset:2px}
+
+  .breakdown{display:flex;flex-direction:column;gap:18px}
+  .panel-card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px 18px 8px}
+  .grp-title{font-family:'Barlow Condensed';font-weight:700;font-size:13px;letter-spacing:2.5px;text-transform:uppercase;color:var(--green-soft);margin-bottom:2px}
+  .rowstat{display:grid;grid-template-columns:1fr auto;gap:4px 14px;padding:11px 0;border-bottom:1px solid var(--line);align-items:center}
+  .rowstat:last-child{border-bottom:none}
+  .rs-label{font-family:'Barlow Condensed';font-weight:600;font-size:16px}
+  .rs-val{font-family:'Anton';font-size:22px;line-height:1;justify-self:end}
+  .rs-val small{font-family:'Inter';font-weight:600;font-size:12px;color:var(--muted);margin-left:2px}
+  .rs-bar-wrap{grid-column:1/-1;display:flex;align-items:center;gap:10px;margin-top:8px}
+  .rs-bar{flex:1;height:7px;border-radius:5px;background:rgba(255,255,255,.08);overflow:hidden}
+  .rs-bar i{display:block;height:100%;border-radius:5px;background:linear-gradient(90deg,var(--green),var(--green-soft));width:0;transition:width .7s cubic-bezier(.2,.7,.3,1)}
+  .rank{font-family:'Barlow Condensed';font-weight:700;font-size:12px;letter-spacing:.5px;padding:3px 8px;border-radius:100px;white-space:nowrap;border:1px solid var(--line-strong);color:var(--muted)}
+  .rank.top{color:#07120f;background:linear-gradient(180deg,var(--gold1),var(--gold2));border-color:transparent}
+  .rank.podium{color:var(--gold1);border-color:var(--gold2)}
+
+  .radar-card{display:flex;flex-direction:column;align-items:center}
+  .radar-legend{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;margin-top:6px}
+  .lg{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
+  .lg i{width:12px;height:3px;border-radius:2px;display:block}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+  .hl{font-family:'Barlow Condensed';font-weight:700;font-size:13px;letter-spacing:.5px;padding:6px 11px;border-radius:100px;background:rgba(0,166,81,.14);border:1px solid rgba(0,166,81,.4);color:var(--green-soft)}
+  .hl.gold{background:rgba(211,162,63,.15);border-color:rgba(211,162,63,.5);color:var(--gold1)}
+
+  .lb-metrics{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;-webkit-overflow-scrolling:touch}
+  .lb-metrics button{font-family:'Barlow Condensed';font-weight:600;font-size:14px;letter-spacing:.5px;white-space:nowrap;padding:8px 13px;border-radius:100px;border:1px solid var(--line);background:var(--panel);color:var(--muted);cursor:pointer}
+  .lb-metrics button.on{color:#07120f;background:linear-gradient(180deg,var(--gold1),var(--gold2));border-color:transparent}
+  .lb-metrics button:focus-visible{outline:2px solid var(--green-soft);outline-offset:2px}
+  .lbrow{display:grid;grid-template-columns:34px 1fr auto;gap:12px;align-items:center;padding:12px 4px;border-bottom:1px solid var(--line)}
+  .lbrow:last-child{border-bottom:none}
+  .lbpos{font-family:'Anton';font-size:18px;color:var(--muted2);text-align:center}
+  .lbrow.p1 .lbpos,.lbrow.p2 .lbpos,.lbrow.p3 .lbpos{color:var(--gold1)}
+  .lbmed{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-family:'Anton';font-size:12px;margin:0 auto;color:#07120f}
+  .lbrow.p1 .lbmed{background:linear-gradient(180deg,#FBEAA0,var(--gold2))}
+  .lbrow.p2 .lbmed{background:linear-gradient(180deg,#EbEFF3,var(--silver2))}
+  .lbrow.p3 .lbmed{background:linear-gradient(180deg,#E5A667,#9c5b23);color:#fff}
+  .lbname{font-family:'Barlow Condensed';font-weight:600;font-size:18px;line-height:1}
+  .lbname .sub{font-family:'Inter';font-size:11px;color:var(--muted);letter-spacing:.5px;margin-top:2px;font-weight:400}
+  .lbbar{height:6px;border-radius:4px;background:rgba(255,255,255,.07);overflow:hidden;margin-top:6px;max-width:280px}
+  .lbbar i{display:block;height:100%;background:linear-gradient(90deg,var(--green),var(--green-soft));width:0;transition:width .6s ease}
+  .lbval{font-family:'Anton';font-size:22px;text-align:right;white-space:nowrap}
+  .lbval small{font-family:'Inter';font-weight:600;font-size:11px;color:var(--muted);margin-left:2px}
+  .lbrow.me{background:linear-gradient(90deg,rgba(0,166,81,.10),transparent);border-radius:10px}
+
+  .cmp-heads{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .cmp-radar{display:flex;flex-direction:column;align-items:center;margin-top:8px}
+  .cmp-row{display:grid;grid-template-columns:1fr 64px 1fr;gap:8px;align-items:center;padding:11px 0;border-bottom:1px solid var(--line)}
+  .cmp-row:last-child{border-bottom:none}
+  .cmp-mid{font-family:'Barlow Condensed';font-weight:600;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);text-align:center;line-height:1.15}
+  .cmp-v{font-family:'Anton';font-size:20px;display:flex;align-items:center;gap:7px}
+  .cmp-v.right{justify-content:flex-end}
+  .cmp-v .dot{width:8px;height:8px;border-radius:50%;flex:none;opacity:.35}
+  .cmp-v.win .dot{opacity:1}
+  .cmp-v.win{color:var(--green-soft)}
+
+  footer{color:var(--muted2);font-size:12px;text-align:center;margin-top:40px;line-height:1.6}
+  footer b{color:var(--muted)}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-in">
+    <div class="crest"><span>BB</span></div>
+    <div>
+      <div class="club-name">Bénin Boyz FC</div>
+      <div class="club-sub">EA Sports FC · Pro Clubs</div>
+    </div>
+    <div class="tag">11 membres</div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <div class="eyebrow">Statistiques du club</div>
+    <h1>Chaque<br><em>joueur</em>, sa carte</h1>
+    <p>Profils, classements et comparaisons. Bascule entre totaux carrière et moyenne par match.</p>
+    <div class="team-strip" id="teamStrip"></div>
+  </section>
+
+  <div class="tabs" role="tablist">
+    <button class="tab active" data-tab="players" role="tab">Joueurs</button>
+    <button class="tab" data-tab="board" role="tab">Classement</button>
+    <button class="tab" data-tab="compare" role="tab">Comparer</button>
+  </div>
+
+  <div id="view"></div>
+
+  <footer>
+    Données saisies depuis la page officielle EA Sports FC Clubs · <b>Bénin Boyz FC</b><br>
+    Classements, taux et moyennes calculés sur les 11 membres du club.
+  </footer>
+</main>
+
+<script>
+const PLAYERS = [
+  {name:"AkaDelaFontaine", pos:"Milieu",    ovr:75, gp:16,   goals:1,    assists:3,   passes:192,   passpct:80, tackles:31,   tklpct:50, winpct:56},
+  {name:"Backtothebando93",pos:"Attaquant", ovr:87, gp:377,  goals:164,  assists:93,  passes:4803,  passpct:84, tackles:244,  tklpct:22, winpct:54},
+  {name:"bankachor95",     pos:"Milieu",    ovr:86, gp:1011, goals:856,  assists:735, passes:16869, passpct:79, tackles:1059, tklpct:30, winpct:49},
+  {name:"callighost",      pos:"Milieu",    ovr:84, gp:758,  goals:89,   assists:301, passes:14508, passpct:81, tackles:549,  tklpct:21, winpct:48},
+  {name:"fosseauxlions",   pos:"Milieu",    ovr:70, gp:65,   goals:12,   assists:35,  passes:926,   passpct:75, tackles:54,   tklpct:19, winpct:63},
+  {name:"Hardebaran",      pos:"Attaquant", ovr:83, gp:181,  goals:16,   assists:8,   passes:1729,  passpct:84, tackles:173,  tklpct:25, winpct:53},
+  {name:"Kaz_229_",        pos:"Milieu",    ovr:89, gp:191,  goals:52,   assists:211, passes:3489,  passpct:78, tackles:264,  tklpct:15, winpct:55},
+  {name:"MambaNoir_07",    pos:"Attaquant", ovr:87, gp:1038, goals:1439, assists:518, passes:19447, passpct:85, tackles:850,  tklpct:37, winpct:50},
+  {name:"nll_abk",         pos:"Milieu",    ovr:76, gp:60,   goals:22,   assists:17,  passes:701,   passpct:82, tackles:33,   tklpct:8,  winpct:41},
+  {name:"saint_yaane",     pos:"Attaquant", ovr:87, gp:9,    goals:7,    assists:3,   passes:133,   passpct:85, tackles:5,    tklpct:11, winpct:66},
+  {name:"Sems1509",        pos:"Milieu",    ovr:80, gp:13,   goals:0,    assists:1,   passes:132,   passpct:79, tackles:6,    tklpct:24, winpct:38},
+];
+
+const state = {tab:"players", sel:0, perMatch:false, metric:"goals", cmpA:7, cmpB:2};
+
+const tier = o => o>=87 ? "elite" : o>=75 ? "gold" : "silver";
+const initials = n => (n.replace(/[^A-Za-z]/g,"").slice(0,2).toUpperCase()) || "??";
+const fmtN = n => Number.isInteger(n) ? n.toLocaleString('fr-FR') : n.toFixed(2).replace('.',',');
+const avg = k => Math.round(PLAYERS.reduce((s,p)=>s+p[k],0)/PLAYERS.length);
+const sum = k => PLAYERS.reduce((s,p)=>s+p[k],0);
+const ga = p => p.goals+p.assists;
+const isRate = k => ["ovr","passpct","tklpct","winpct","gp"].includes(k);
+
+function val(p,key,pm){
+  if(isRate(key)) return p[key];
+  const raw = key==="ga" ? ga(p) : p[key];
+  return pm && p.gp ? raw/p.gp : raw;
+}
+const maxOf = (key,pm)=>Math.max(...PLAYERS.map(p=>val(p,key,pm)));
+const rankOf = (p,key,pm)=>{const v=val(p,key,pm);return PLAYERS.filter(x=>val(x,key,pm)>v).length+1;};
+
+document.getElementById('teamStrip').innerHTML = [
+  {v:avg('ovr'),l:"Note moyenne"},{v:fmtN(sum('goals')),l:"Buts cumulés"},
+  {v:fmtN(sum('assists')),l:"Passes déc."},{v:avg('winpct')+"%",l:"Victoires moy."},
+].map(t=>`<div class="tstat"><div class="v">${t.v}</div><div class="l">${t.l}</div></div>`).join('');
+
+/* radar */
+const AXES=[{key:"goals",label:"Attaque"},{key:"assists",label:"Créativité"},{key:"passes",label:"Passes"},{key:"tackles",label:"Défense"},{key:"winpct",label:"Victoires"}];
+function radarPts(p,pm,R,cx,cy){
+  return AXES.map((ax,i)=>{
+    const a=-Math.PI/2+i*2*Math.PI/AXES.length, mx=maxOf(ax.key,pm)||1;
+    const r=R*Math.min(1,val(p,ax.key,pm)/mx);
+    return [cx+r*Math.cos(a),cy+r*Math.sin(a)];
+  });
+}
+function radarSVG(players,pm,colors){
+  const S=220,cx=110,cy=110,R=80;let g="";
+  [.25,.5,.75,1].forEach(f=>{const pts=AXES.map((ax,i)=>{const a=-Math.PI/2+i*2*Math.PI/AXES.length;return `${cx+R*f*Math.cos(a)},${cy+R*f*Math.sin(a)}`;}).join(' ');g+=`<polygon points="${pts}" fill="none" stroke="rgba(255,255,255,.10)"/>`;});
+  let sp="",lb="";
+  AXES.forEach((ax,i)=>{const a=-Math.PI/2+i*2*Math.PI/AXES.length,ex=cx+R*Math.cos(a),ey=cy+R*Math.sin(a);sp+=`<line x1="${cx}" y1="${cy}" x2="${ex}" y2="${ey}" stroke="rgba(255,255,255,.10)"/>`;const lx=cx+(R+16)*Math.cos(a),ly=cy+(R+16)*Math.sin(a),anc=Math.abs(Math.cos(a))<.3?'middle':(Math.cos(a)>0?'start':'end');lb+=`<text x="${lx}" y="${ly+3}" fill="#94aaa1" font-size="10" font-family="Barlow Condensed" font-weight="600" letter-spacing="1" text-anchor="${anc}">${ax.label.toUpperCase()}</text>`;});
+  let po="";
+  players.forEach((p,idx)=>{const c=colors[idx];const P=radarPts(p,pm,R,cx,cy);po+=`<polygon points="${P.map(pt=>pt.map(n=>n.toFixed(1)).join(',')).join(' ')}" fill="${c}22" stroke="${c}" stroke-width="2"/>`;P.forEach(pt=>po+=`<circle cx="${pt[0].toFixed(1)}" cy="${pt[1].toFixed(1)}" r="2.6" fill="${c}"/>`);});
+  return `<svg width="${S}" height="${S}" viewBox="0 0 ${S} ${S}" role="img" aria-label="Profil radar">${g}${sp}${lb}${po}</svg>`;
+}
+
+function highlights(p){
+  const specs=[["goals","Meilleur buteur","Top buteur"],["assists","Meilleur passeur","Top passeur"],["passes","Maître à la relance","Top relanceur"],["tackles","Mur défensif","Top défenseur"],["winpct","Roi des victoires","Top % victoires"],["ovr","Meilleure note","Top note"]];
+  const out=[];
+  specs.forEach(([k,n1,n])=>{const r=rankOf(p,k,false);if(r<=3)out.push({r,txt:r===1?n1:n,gold:r===1});});
+  if(p.gp>=10){const r=rankOf(p,"goals",true);if(r<=3)out.push({r:r+.5,txt:r===1?"Efficacité redoutable":"Top efficacité",gold:r===1});}
+  out.sort((a,b)=>a.r-b.r);
+  if(!out.length)out.push({txt:"Profil polyvalent",gold:false});
+  return out.slice(0,4);
+}
+
+const ovrBadge=p=>`<span class="ovr-badge ${tier(p.ovr)}">${p.ovr}</span>`;
+function cardHTML(p,actions){
+  return `<div class="card ${tier(p.ovr)}" data-card>
+    <span class="shine"></span>
+    <div class="card-top">
+      <div class="card-ovr"><span class="n">${p.ovr}</span><span class="p">${p.pos.slice(0,3).toUpperCase()}</span>
+        <span class="flag" aria-label="Bénin"><span class="g"></span><span class="yr"><span class="y"></span><span class="r"></span></span></span></div>
+      <div class="avatar">${initials(p.name)}</div>
+    </div>
+    <div class="card-name">${p.name}</div>
+    <div class="card-mini">
+      <div><div class="cv">${fmtN(p.goals)}</div><div class="cl">Buts</div></div>
+      <div><div class="cv">${fmtN(p.assists)}</div><div class="cl">P. déc</div></div>
+      <div><div class="cv">${p.winpct}%</div><div class="cl">Vict.</div></div>
+    </div></div>${actions?`<div class="card-actions"><button class="btn" data-export>Exporter la carte</button></div>`:''}`;
+}
+const pickerHTML=(active,cls)=>`<div class="picker">`+PLAYERS.map((p,i)=>`<button class="pchip ${cls||''} ${i===active?'active':''}" data-i="${i}">${ovrBadge(p)}<span><span class="nm">${p.name}</span><span class="ps">${p.pos}</span></span></button>`).join('')+`</div>`;
+const modeToggle=()=>`<div class="seg" data-toggle><button data-pm="0" class="${!state.perMatch?'on':''}">Totaux</button><button data-pm="1" class="${state.perMatch?'on':''}">Par match</button></div>`;
+
+/* PLAYERS */
+const GROUPS=[
+  {title:"Attaque",rows:[["goals","Buts",""],["assists","Passes décisives",""],["ga","Buts + passes",""]]},
+  {title:"Construction",rows:[["passes","Passes réussies",""],["passpct","Réussite passes","%"]]},
+  {title:"Défense",rows:[["tackles","Tacles réussis",""],["tklpct","Réussite tacles","%"]]},
+  {title:"Bilan",rows:[["gp","Matchs joués",""],["winpct","Victoires","%"]]},
+];
+const rankPill=r=>`<span class="${r===1?'rank top':r<=3?'rank podium':'rank'}">${r===1?"1ᵉʳ du club":r+"ᵉ / 11"}</span>`;
+
+function renderPlayers(){
+  const p=PLAYERS[state.sel], pm=state.perMatch;
+  const groups=GROUPS.map(g=>{
+    const rows=g.rows.map(([k,label,sfx])=>{
+      const usePM=pm && !isRate(k);
+      const v=val(p,k,pm), mx=maxOf(k,pm)||1, r=rankOf(p,k,pm);
+      const shown = usePM ? fmtN(v) : (k==="ga"?fmtN(ga(p)):fmtN(p[k]));
+      return `<div class="rowstat">
+        <div class="rs-label">${label}${usePM?' <small style="color:var(--muted);font-family:Inter;font-size:11px">/match</small>':''}</div>
+        <div class="rs-val">${shown}${sfx?`<small>${sfx}</small>`:''}</div>
+        <div class="rs-bar-wrap"><div class="rs-bar"><i data-w="${(v/mx*100).toFixed(1)}"></i></div>${rankPill(r)}</div>
+      </div>`;
+    }).join('');
+    return `<div class="panel-card"><div class="grp-title">${g.title}</div>${rows}</div>`;
+  }).join('');
+  const hls=highlights(p).map(h=>`<span class="hl ${h.gold?'gold':''}">${h.txt}</span>`).join('');
+  document.getElementById('view').innerHTML=`
+    <div class="sec-label"><h2>Choisis ton joueur</h2><div class="rule"></div>${modeToggle()}</div>
+    ${pickerHTML(state.sel)}
+    <div class="detail-grid" style="margin-top:22px">
+      <div>${cardHTML(p,true)}
+        <div class="panel-card radar-card" style="margin-top:18px">
+          <div class="grp-title" style="align-self:flex-start">Profil</div>
+          ${radarSVG([p],pm,['#1fd07a'])}
+          <div class="chips" style="justify-content:center">${hls}</div>
+        </div>
+      </div>
+      <div class="breakdown">${groups}</div>
+    </div>`;
+  animateBars();
+}
+
+/* BOARD */
+const METRICS=[
+  {key:"goals",label:"Buts",sfx:""},{key:"assists",label:"Passes déc.",sfx:""},{key:"ga",label:"Buts+passes",sfx:""},
+  {key:"passes",label:"Passes",sfx:""},{key:"passpct",label:"% Passes",sfx:"%"},{key:"tackles",label:"Tacles",sfx:""},
+  {key:"tklpct",label:"% Tacles",sfx:"%"},{key:"winpct",label:"% Victoires",sfx:"%"},{key:"ovr",label:"Note",sfx:""},{key:"gp",label:"Matchs",sfx:""},
+];
+function renderBoard(){
+  const m=METRICS.find(x=>x.key===state.metric)||METRICS[0];
+  const canPM=!isRate(m.key), pm=state.perMatch&&canPM;
+  const rows=PLAYERS.map(p=>({p,v:val(p,m.key,pm)})).sort((a,b)=>b.v-a.v);
+  const mx=rows[0].v||1;
+  const list=rows.map((row,i)=>{
+    const pos=i+1, me=row.p.name===PLAYERS[state.sel].name;
+    const medal=pos<=3?`<div class="lbmed">${pos}</div>`:`<div class="lbpos">${pos}</div>`;
+    return `<div class="lbrow p${pos} ${me?'me':''}">${medal}
+      <div><div class="lbname">${row.p.name}<div class="sub">${row.p.pos} · ${row.p.gp} matchs</div></div>
+        <div class="lbbar"><i data-w="${(row.v/mx*100).toFixed(1)}"></i></div></div>
+      <div class="lbval">${fmtN(row.v)}${m.sfx?`<small>${m.sfx}</small>`:(pm?'<small>/m</small>':'')}</div></div>`;
+  }).join('');
+  document.getElementById('view').innerHTML=`
+    <div class="sec-label"><h2>Classement du club</h2><div class="rule"></div>${canPM?modeToggle():''}</div>
+    <div class="lb-metrics">${METRICS.map(x=>`<button data-metric="${x.key}" class="${x.key===state.metric?'on':''}">${x.label}</button>`).join('')}</div>
+    <div class="panel-card" style="margin-top:14px">${list}</div>`;
+  animateBars('.lbbar i');
+}
+
+/* COMPARE */
+const CMP=[["ovr","Note"],["gp","Matchs"],["goals","Buts"],["assists","Passes déc."],["ga","Buts+passes"],["passes","Passes"],["passpct","% passes"],["tackles","Tacles"],["tklpct","% tacles"],["winpct","% victoires"]];
+function renderCompare(){
+  const A=PLAYERS[state.cmpA], B=PLAYERS[state.cmpB], pm=state.perMatch;
+  const rows=CMP.map(([k,label])=>{
+    const usePM=pm&&!isRate(k), va=val(A,k,usePM), vb=val(B,k,usePM);
+    return `<div class="cmp-row">
+      <div class="cmp-v right ${va>vb?'win':''}">${fmtN(va)}<span class="dot" style="background:#1fd07a"></span></div>
+      <div class="cmp-mid">${label}${usePM?'<br>/match':''}</div>
+      <div class="cmp-v ${vb>va?'win':''}"><span class="dot" style="background:#F0CE6E"></span>${fmtN(vb)}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('view').innerHTML=`
+    <div class="sec-label"><h2>Joueur A</h2><div class="rule"></div>${modeToggle()}</div>
+    ${pickerHTML(state.cmpA,'pickA')}
+    <div class="sec-label"><h2>Joueur B</h2><div class="rule"></div></div>
+    ${pickerHTML(state.cmpB,'pickB pick2')}
+    <div class="cmp-heads" style="margin-top:22px"><div>${cardHTML(A,false)}</div><div>${cardHTML(B,false)}</div></div>
+    <div class="panel-card cmp-radar" style="margin-top:18px">${radarSVG([A,B],pm,['#1fd07a','#F0CE6E'])}
+      <div class="radar-legend"><span class="lg"><i style="background:#1fd07a"></i>${A.name}</span><span class="lg"><i style="background:#F0CE6E"></i>${B.name}</span></div></div>
+    <div class="panel-card" style="margin-top:18px">${rows}</div>`;
+}
+
+function animateBars(sel='#view .rs-bar i'){requestAnimationFrame(()=>document.querySelectorAll(sel).forEach(el=>el.style.width=el.dataset.w+"%"));}
+function render(){state.tab==="players"?renderPlayers():state.tab==="board"?renderBoard():renderCompare();}
+
+document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));t.classList.add('active');state.tab=t.dataset.tab;render();}));
+
+document.getElementById('view').addEventListener('click',e=>{
+  const chip=e.target.closest('.pchip'),tog=e.target.closest('[data-pm]'),met=e.target.closest('[data-metric]'),exp=e.target.closest('[data-export]');
+  if(chip){const i=+chip.dataset.i;
+    if(state.tab==="players")state.sel=i;
+    else if(state.tab==="compare"){chip.classList.contains('pickA')?state.cmpA=i:state.cmpB=i;}
+    render();
+    if(state.tab==="players"){const y=document.querySelector('.detail-grid').getBoundingClientRect().top+scrollY-74;scrollTo({top:y,behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth'});}
+  }
+  if(tog){state.perMatch=tog.dataset.pm==="1";render();}
+  if(met){state.metric=met.dataset.metric;render();}
+  if(exp)exportCard(exp);
+});
+
+function exportCard(btn){
+  const target=document.querySelector('[data-card]');
+  if(typeof html2canvas==="undefined"){btn.textContent="Export indispo hors-ligne";return;}
+  const orig=btn.textContent;btn.textContent="Génération…";
+  html2canvas(target,{backgroundColor:null,scale:3,logging:false}).then(c=>{
+    const a=document.createElement('a');a.download=`carte-${PLAYERS[state.sel].name}.png`;a.href=c.toDataURL('image/png');a.click();
+    btn.textContent="Carte téléchargée ✓";setTimeout(()=>btn.textContent=orig,2200);
+  }).catch(()=>{btn.textContent="Échec, réessaie";setTimeout(()=>btn.textContent=orig,2200);});
+}
+
+render();
+</script>
+</body>
+</html>
