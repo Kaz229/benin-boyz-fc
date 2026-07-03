@@ -50,6 +50,13 @@
   .tab.active{color:#07120f;background:linear-gradient(180deg,var(--gold1),var(--gold2))}
   .tab:focus-visible{outline:2px solid var(--green-soft);outline-offset:2px}
 
+  .clubbar{display:flex;gap:6px;margin:18px 0 2px;background:var(--panel);border:1px solid var(--line);border-radius:100px;padding:5px}
+  .clubtab{flex:1;font-family:'Barlow Condensed';font-weight:700;font-size:14px;letter-spacing:1px;text-transform:uppercase;padding:9px 8px;border-radius:100px;background:none;border:none;color:var(--muted);cursor:pointer;transition:.15s;white-space:nowrap}
+  .clubtab:hover{color:var(--text)}
+  .clubtab.on{color:#07120f;background:linear-gradient(180deg,var(--green-soft),var(--green))}
+  .clubtab:focus-visible{outline:2px solid var(--green-soft);outline-offset:2px}
+  footer{margin-top:34px;padding-top:18px;border-top:1px solid var(--line);color:var(--muted2);font-size:12px;line-height:1.6}
+
   .seg{display:inline-flex;background:var(--panel);border:1px solid var(--line);border-radius:100px;padding:4px;gap:2px}
   .seg button{font-family:'Barlow Condensed';font-weight:600;font-size:13px;letter-spacing:1px;text-transform:uppercase;padding:7px 14px;border-radius:100px;background:none;border:none;color:var(--muted);cursor:pointer}
   .seg button.on{color:#07120f;background:var(--green-soft)}
@@ -168,12 +175,12 @@
 
 <header class="topbar">
   <div class="topbar-in">
-    <div class="crest"><span>BB</span></div>
+    <div class="crest"><span id="crestTxt">BB</span></div>
     <div>
-      <div class="club-name">Bénin Boyz FC</div>
+      <div class="club-name" id="clubName">Bénin Boyz FC</div>
       <div class="club-sub">EA Sports FC · Pro Clubs</div>
     </div>
-    <div class="tag">11 membres</div>
+    <div class="tag" id="memberTag">11 membres</div>
   </div>
 </header>
 
@@ -182,6 +189,7 @@
     <div class="eyebrow">Statistiques du club</div>
     <h1>Chaque<br><em>joueur</em>, sa carte</h1>
     <p>Profils, classements et comparaisons. Bascule entre totaux carrière et moyenne par match.</p>
+    <div class="clubbar" id="clubBar"></div>
     <div class="team-strip" id="teamStrip"></div>
   </section>
 
@@ -193,31 +201,93 @@
 
   <div id="view"></div>
 
-  <footer>
-    Données saisies depuis la page officielle EA Sports FC Clubs · <b>Bénin Boyz FC</b><br>
-    Classements, taux et moyennes calculés sur les 11 membres du club.
-  </footer>
+  <footer id="footNote"></footer>
 </main>
 
 <script>
 /* Données de secours (fallback) si data.json est indisponible.
    En temps normal elles sont remplacées au chargement par data.json,
    généré depuis l'API EA (voir scripts/fetch-stats.mjs). */
-let PLAYERS = [
-  {name:"AkaDelaFontaine",pos:"Milieu",ovr:75,gp:16,goals:1,assists:3,passes:192,passpct:80,tackles:31,tklpct:50,winpct:56,rating:8,shotpct:100,motm:4,reds:0,form:[0,0,0,0,0,0,1,0,0,0]},
-  {name:"Backtothebando93",pos:"Attaquant",ovr:87,gp:377,goals:164,assists:93,passes:4803,passpct:84,tackles:244,tklpct:22,winpct:54,rating:7.2,shotpct:33,motm:22,reds:0,form:[3,7,3,11,6,3,7,1,0,2]},
-  {name:"bankachor95",pos:"Milieu",ovr:86,gp:1011,goals:856,assists:735,passes:16869,passpct:79,tackles:1059,tklpct:30,winpct:49,rating:8,shotpct:42,motm:172,reds:2,form:[10,11,4,11,12,10,13,8,13,14]},
-  {name:"callighost",pos:"Milieu",ovr:84,gp:758,goals:89,assists:301,passes:14508,passpct:81,tackles:549,tklpct:21,winpct:48,rating:7.5,shotpct:26,motm:37,reds:1,form:[2,1,0,1,1,1,2,1,1,1]},
-  {name:"fosseauxlions",pos:"Milieu",ovr:70,gp:65,goals:12,assists:35,passes:926,passpct:75,tackles:54,tklpct:19,winpct:63,rating:7.2,shotpct:26,motm:0,reds:0,form:[0,1,1,4,2,1,0,1,1,0]},
-  {name:"Hardebaran",pos:"Attaquant",ovr:83,gp:181,goals:16,assists:8,passes:1729,passpct:84,tackles:173,tklpct:25,winpct:53,rating:6.7,shotpct:20,motm:4,reds:1,form:[4,0,1,3,0,2,2,1,0,0]},
-  {name:"Kaz_229_",pos:"Milieu",ovr:89,gp:191,goals:52,assists:211,passes:3489,passpct:78,tackles:264,tklpct:15,winpct:55,rating:8,shotpct:32,motm:20,reds:1,form:[3,2,4,2,2,3,1,3,3,5]},
-  {name:"MambaNoir_07",pos:"Attaquant",ovr:87,gp:1038,goals:1439,assists:518,passes:19447,passpct:85,tackles:850,tklpct:37,winpct:50,rating:8.3,shotpct:38,motm:288,reds:0,form:[22,29,28,29,16,33,18,22,26,18]},
-  {name:"nll_abk",pos:"Milieu",ovr:76,gp:60,goals:22,assists:17,passes:701,passpct:82,tackles:33,tklpct:8,winpct:41,rating:6.9,shotpct:30,motm:2,reds:0,form:[1,3,2,2,0,2,3,1,3,0]},
-  {name:"saint_yaane",pos:"Attaquant",ovr:87,gp:9,goals:7,assists:3,passes:133,passpct:85,tackles:5,tklpct:11,winpct:66,rating:7.7,shotpct:43,motm:2,reds:0,form:[2,3,1,2,0,0,0,0,0,0]},
-  {name:"Sems1509",pos:"Milieu",ovr:80,gp:13,goals:0,assists:1,passes:132,passpct:79,tackles:6,tklpct:24,winpct:38,rating:6.3,shotpct:0,motm:0,reds:0,form:[0,0,0,0,0,0,0,0,0,0]},
+let CLUBS = [
+  {name:"Bénin Boyz FC",clubId:"276969",players:[
+    {name:"AkaDelaFontaine",pos:"Milieu",ovr:75,gp:16,goals:1,assists:3,passes:192,passpct:80,tackles:31,tklpct:50,winpct:56,rating:8,shotpct:100,motm:4,reds:0,form:[0,0,0,0,0,0,1,0,0,0]},
+    {name:"Backtothebando93",pos:"Attaquant",ovr:87,gp:377,goals:164,assists:93,passes:4803,passpct:84,tackles:244,tklpct:22,winpct:54,rating:7.2,shotpct:33,motm:22,reds:0,form:[3,7,3,11,6,3,7,1,0,2]},
+    {name:"bankachor95",pos:"Milieu",ovr:86,gp:1011,goals:856,assists:735,passes:16869,passpct:79,tackles:1059,tklpct:30,winpct:49,rating:8,shotpct:42,motm:172,reds:2,form:[10,11,4,11,12,10,13,8,13,14]},
+    {name:"callighost",pos:"Milieu",ovr:84,gp:758,goals:89,assists:301,passes:14508,passpct:81,tackles:549,tklpct:21,winpct:48,rating:7.5,shotpct:26,motm:37,reds:1,form:[2,1,0,1,1,1,2,1,1,1]},
+    {name:"fosseauxlions",pos:"Milieu",ovr:70,gp:65,goals:12,assists:35,passes:926,passpct:75,tackles:54,tklpct:19,winpct:63,rating:7.2,shotpct:26,motm:0,reds:0,form:[0,1,1,4,2,1,0,1,1,0]},
+    {name:"Hardebaran",pos:"Attaquant",ovr:83,gp:181,goals:16,assists:8,passes:1729,passpct:84,tackles:173,tklpct:25,winpct:53,rating:6.7,shotpct:20,motm:4,reds:1,form:[4,0,1,3,0,2,2,1,0,0]},
+    {name:"Kaz_229_",pos:"Milieu",ovr:89,gp:191,goals:52,assists:211,passes:3489,passpct:78,tackles:264,tklpct:15,winpct:55,rating:8,shotpct:32,motm:20,reds:1,form:[3,2,4,2,2,3,1,3,3,5]},
+    {name:"MambaNoir_07",pos:"Attaquant",ovr:87,gp:1038,goals:1439,assists:518,passes:19447,passpct:85,tackles:850,tklpct:37,winpct:50,rating:8.3,shotpct:38,motm:288,reds:0,form:[22,29,28,29,16,33,18,22,26,18]},
+    {name:"nll_abk",pos:"Milieu",ovr:76,gp:60,goals:22,assists:17,passes:701,passpct:82,tackles:33,tklpct:8,winpct:41,rating:6.9,shotpct:30,motm:2,reds:0,form:[1,3,2,2,0,2,3,1,3,0]},
+    {name:"saint_yaane",pos:"Attaquant",ovr:87,gp:9,goals:7,assists:3,passes:133,passpct:85,tackles:5,tklpct:11,winpct:66,rating:7.7,shotpct:43,motm:2,reds:0,form:[2,3,1,2,0,0,0,0,0,0]},
+    {name:"Sems1509",pos:"Milieu",ovr:80,gp:13,goals:0,assists:1,passes:132,passpct:79,tackles:6,tklpct:24,winpct:38,rating:6.3,shotpct:0,motm:0,reds:0,form:[0,0,0,0,0,0,0,0,0,0]}
+  ]},
+  {name:"Aupiais FC",clubId:"82414",players:[
+    {name:"Backtothebando93",pos:"Milieu",ovr:84,gp:131,goals:113,assists:65,passes:1808,passpct:85,tackles:78,tklpct:28,winpct:58,rating:7.7,shotpct:38,motm:18,reds:0,form:[1,11,8,5,5,7,2,3,5,0]},
+    {name:"bankachor95",pos:"Milieu",ovr:87,gp:337,goals:311,assists:233,passes:6017,passpct:80,tackles:359,tklpct:33,winpct:49,rating:8.2,shotpct:38,motm:82,reds:0,form:[5,8,5,8,8,6,10,3,12,7]},
+    {name:"callighost",pos:"Milieu",ovr:85,gp:201,goals:21,assists:80,passes:3706,passpct:79,tackles:141,tklpct:14,winpct:52,rating:7.6,shotpct:19,motm:8,reds:0,form:[0,0,0,0,0,1,0,1,2,0]},
+    {name:"fosseauxlions",pos:"Milieu",ovr:78,gp:35,goals:13,assists:17,passes:576,passpct:79,tackles:32,tklpct:21,winpct:65,rating:7.8,shotpct:28,motm:4,reds:0,form:[2,1,1,3,1,2,0,0,0,1]},
+    {name:"Hardebaran",pos:"Milieu",ovr:82,gp:37,goals:7,assists:0,passes:378,passpct:86,tackles:38,tklpct:33,winpct:40,rating:6.9,shotpct:31,motm:1,reds:1,form:[0,0,0,0,0,0,0,4,1,1]},
+    {name:"Kaz_229_",pos:"Milieu",ovr:89,gp:15,goals:11,assists:15,passes:275,passpct:76,tackles:28,tklpct:32,winpct:93,rating:8.9,shotpct:44,motm:4,reds:0,form:[3,1,2,1,2,2,0,0,0,0]},
+    {name:"Kaz229",pos:"Milieu",ovr:83,gp:29,goals:18,assists:26,passes:565,passpct:75,tackles:41,tklpct:18,winpct:44,rating:8.9,shotpct:39,motm:5,reds:0,form:[1,0,2,2,2,2,0,1,0,1]},
+    {name:"lerouch241",pos:"Attaquant",ovr:83,gp:2,goals:1,assists:0,passes:9,passpct:69,tackles:0,tklpct:0,winpct:100,rating:6.4,shotpct:33,motm:0,reds:0,form:[1,0,0,0,0,0,0,0,0,0]},
+    {name:"MambaNoir_07",pos:"Attaquant",ovr:86,gp:183,goals:238,assists:114,passes:5265,passpct:85,tackles:253,tklpct:43,winpct:53,rating:8.2,shotpct:39,motm:46,reds:0,form:[12,13,10,18,15,11,7,8,17,10]},
+    {name:"nll_abk",pos:"Attaquant",ovr:81,gp:57,goals:30,assists:8,passes:592,passpct:82,tackles:45,tklpct:11,winpct:50,rating:7,shotpct:34,motm:2,reds:0,form:[1,4,1,2,5,1,3,4,2,1]},
+    {name:"Sam_77_jr",pos:"Attaquant",ovr:74,gp:5,goals:1,assists:3,passes:48,passpct:71,tackles:2,tklpct:3,winpct:80,rating:7,shotpct:9,motm:1,reds:0,form:[0,0,0,0,1,0,0,0,0,0]},
+    {name:"Sems1509",pos:"Milieu",ovr:78,gp:13,goals:0,assists:3,passes:155,passpct:80,tackles:2,tklpct:18,winpct:46,rating:7,shotpct:0,motm:0,reds:0,form:[0,0,0,0,0,0,0,0,0,0]}
+  ]},
 ];
+let PLAYERS = [];
 
-const state = {tab:"players", sel:0, perMatch:false, metric:"goals", cmpA:7, cmpB:2};
+const state = {tab:"players", club:0, sel:0, perMatch:false, metric:"goals", cmpA:7, cmpB:2};
+
+/* ---- Multi-clubs ---------------------------------------------------------
+   CLUBS = [{name, clubId, players:[...]}]. state.club vaut un index (0,1,…)
+   ou "all" pour la vue cumulée. PLAYERS est recalculé à chaque changement. */
+const initials2 = s => (s||"").trim().split(/\s+/).map(w=>w[0]||"").join("").slice(0,2).toUpperCase() || "??";
+
+function mergeClubs(clubs){
+  const SUMS=['gp','goals','assists','passes','tackles','motm','reds'];
+  const RATES=['passpct','tklpct','winpct','shotpct','rating'];
+  const byName=new Map();
+  clubs.forEach(c=>(c.players||[]).forEach(p=>{
+    if(!byName.has(p.name)) byName.set(p.name,[]);
+    byName.get(p.name).push(p);
+  }));
+  const out=[];
+  byName.forEach((list,name)=>{
+    if(list.length===1){ out.push({...list[0]}); return; }
+    const o={name};
+    SUMS.forEach(k=> o[k]=list.reduce((s,p)=>s+(p[k]||0),0));
+    const tot=o.gp||0;
+    RATES.forEach(k=>{ const w=list.reduce((s,p)=>s+((p[k]||0)*(p.gp||0)),0);
+      o[k]= tot ? (k==='rating'?Math.round(w/tot*10)/10:Math.round(w/tot)) : 0; });
+    o.ovr=Math.max(...list.map(p=>p.ovr||0));
+    o.form=Array.from({length:10},(_,i)=>list.reduce((s,p)=>s+((p.form&&p.form[i])||0),0));
+    o.pos=list.slice().sort((a,b)=>(b.gp||0)-(a.gp||0))[0].pos;
+    out.push(o);
+  });
+  return out.sort((a,b)=>a.name.localeCompare(b.name,'fr'));
+}
+
+function applyClub(){
+  PLAYERS = state.club==='all' ? mergeClubs(CLUBS) : (CLUBS[state.club]?.players||[]);
+  const n=PLAYERS.length||1;
+  state.sel=Math.min(state.sel,n-1); state.cmpA=Math.min(state.cmpA,n-1); state.cmpB=Math.min(state.cmpB,n-1);
+}
+
+function renderClubBar(){
+  const items=CLUBS.map((c,i)=>({key:String(i),label:c.name})).concat(CLUBS.length>1?[{key:"all",label:"Overall"}]:[]);
+  document.getElementById('clubBar').innerHTML=items.map(it=>
+    `<button class="clubtab ${String(state.club)===it.key?'on':''}" data-club="${it.key}">${it.label}</button>`).join('');
+  const isAll=state.club==='all';
+  document.getElementById('clubName').textContent=isAll?"Tous les clubs":(CLUBS[state.club]?.name||"Club");
+  document.getElementById('crestTxt').textContent=isAll?"★":initials2(CLUBS[state.club]?.name||"");
+  document.getElementById('memberTag').textContent=PLAYERS.length+" membres";
+  document.getElementById('footNote').innerHTML=isAll
+    ? `Vue cumulée sur ${CLUBS.length} clubs · les joueurs présents dans plusieurs clubs sont fusionnés (totaux additionnés, taux au prorata des matchs).`
+    : `Données EA Sports FC Clubs · <b>${CLUBS[state.club]?.name||""}</b> · ${PLAYERS.length} membres.`;
+}
 
 const tier = o => o>=87 ? "elite" : o>=75 ? "gold" : "silver";
 const initials = n => (n.replace(/[^A-Za-z]/g,"").slice(0,2).toUpperCase()) || "??";
@@ -399,7 +469,13 @@ function renderCompare(){
 }
 
 function animateBars(sel='#view .rs-bar i'){requestAnimationFrame(()=>document.querySelectorAll(sel).forEach(el=>el.style.width=el.dataset.w+"%"));}
-function render(){renderTeamStrip();state.tab==="players"?renderPlayers():state.tab==="board"?renderBoard():renderCompare();}
+function render(){renderClubBar();renderTeamStrip();state.tab==="players"?renderPlayers():state.tab==="board"?renderBoard():renderCompare();}
+
+document.getElementById('clubBar').addEventListener('click',e=>{
+  const b=e.target.closest('[data-club]'); if(!b) return;
+  state.club = b.dataset.club==="all" ? "all" : +b.dataset.club;
+  applyClub(); render();
+});
 
 document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));t.classList.add('active');state.tab=t.dataset.tab;render();}));
 
@@ -431,14 +507,13 @@ async function boot(){
     const res = await fetch('data.json?_='+Date.now(), {cache:'no-store'});
     if(res.ok){
       const data = await res.json();
-      if(Array.isArray(data.players) && data.players.length) PLAYERS = data.players;
+      if(Array.isArray(data.clubs) && data.clubs.length) CLUBS = data.clubs;
+      else if(Array.isArray(data.players) && data.players.length) // ancien format 1 club
+        CLUBS = [{name:data.club||"Club", clubId:data.clubId||"", players:data.players}];
     }
   }catch(e){ /* on garde le fallback intégré */ }
-  // sécuriser les index si le nombre de joueurs a changé
-  const n = PLAYERS.length;
-  state.sel  = Math.min(state.sel , n-1);
-  state.cmpA = Math.min(state.cmpA, n-1);
-  state.cmpB = Math.min(state.cmpB, n-1);
+  if(state.club!=="all" && state.club>=CLUBS.length) state.club=0;
+  applyClub();
   render();
 }
 boot();

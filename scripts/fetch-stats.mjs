@@ -7,19 +7,21 @@
  * Elle bloque souvent les IP de datacenter -> si un runner CI échoue,
  * lance ce script en local (IP résidentielle) : `node scripts/fetch-stats.mjs`
  *
- * Config par variables d'environnement :
- *   PLATFORM   plateforme EA (défaut: common-gen5 = PS5/Xbox Series)
- *   CLUB_ID    id numérique du club (recommandé). Sinon recherche par nom.
- *   CLUB_NAME  nom du club pour la recherche (défaut: "Bénin Boyz FC")
+ * Multi-clubs : la liste des clubs à récupérer est dans CLUBS ci-dessous.
+ * PLATFORM (défaut common-gen5 = PS5/Xbox Series) est surchargeable par env.
  */
 
 import { writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
-const PLATFORM  = process.env.PLATFORM  || "common-gen5";
-const CLUB_ID   = process.env.CLUB_ID   || "276969"; // Bénin Boyz FC (common-gen5)
-const CLUB_NAME = process.env.CLUB_NAME || "Bénin Boyz FC";
+const PLATFORM = process.env.PLATFORM || "common-gen5";
+
+// Clubs à agréger (ordre = ordre d'affichage dans le sélecteur du dashboard).
+const CLUBS = [
+  { clubId: "276969", name: "Bénin Boyz FC" },
+  { clubId: "82414",  name: "Aupiais FC" },
+];
 
 const BASE = "https://proclubs.ea.com/api/fc";
 // En-têtes "navigateur" indispensables : sans eux EA renvoie 403 / ferme la socket.
@@ -41,22 +43,6 @@ async function eaFetch(path) {
     throw new Error(`EA ${res.status} sur ${url}\n${body.slice(0, 300)}`);
   }
   return res.json();
-}
-
-async function resolveClubId() {
-  if (CLUB_ID) return CLUB_ID;
-  console.log(`Recherche du club "${CLUB_NAME}" (${PLATFORM})…`);
-  // FC 26 : la recherche de club passe par allTimeLeaderboard/search
-  // (l'ancien clubs/search renvoie désormais 404).
-  const results = await eaFetch(
-    `allTimeLeaderboard/search?platform=${PLATFORM}&clubName=${encodeURIComponent(CLUB_NAME)}`
-  );
-  const list = Array.isArray(results) ? results : Object.values(results || {});
-  if (!list.length) throw new Error(`Aucun club trouvé pour "${CLUB_NAME}".`);
-  const club = list[0];
-  const id = club.clubId || club.clubInfo?.clubId;
-  console.log(`Club trouvé : ${club.clubInfo?.name || CLUB_NAME} -> clubId=${id}`);
-  return String(id);
 }
 
 const POS_FR = {
@@ -93,29 +79,32 @@ export function mapMember(m) {
   };
 }
 
-async function main() {
-  const clubId = await resolveClubId();
-  console.log(`Récupération des stats des membres (clubId=${clubId})…`);
+async function fetchClub({ clubId, name }) {
+  console.log(`Récupération ${name} (clubId=${clubId})…`);
   const stats = await eaFetch(`members/stats?platform=${PLATFORM}&clubId=${clubId}`);
   const members = stats.members || stats.Members || [];
-  if (!members.length) throw new Error("Réponse EA sans membres.");
-
+  if (!members.length) throw new Error(`Réponse EA sans membres pour ${name}.`);
   const players = members
     .map(mapMember)
     .filter((p) => p.name && p.gp > 0) // écarte les membres qui n'ont jamais joué
     .sort((a, b) => a.name.localeCompare(b.name, "fr"));
+  console.log(`  ${name} : ${players.length} joueurs`);
+  return { name, clubId, players };
+}
+
+async function main() {
+  const clubs = [];
+  for (const c of CLUBS) clubs.push(await fetchClub(c)); // en série pour rester poli avec EA
 
   const out = {
-    club: CLUB_NAME,
-    clubId,
-    platform: PLATFORM,
     updated: new Date().toISOString(),
-    players,
+    platform: PLATFORM,
+    clubs,
   };
 
   const root = join(dirname(fileURLToPath(import.meta.url)), "..");
   await writeFile(join(root, "data.json"), JSON.stringify(out, null, 2) + "\n");
-  console.log(`✓ data.json écrit — ${players.length} joueurs.`);
+  console.log(`✓ data.json écrit — ${clubs.length} clubs.`);
 }
 
 // N'exécute main() que lancé directement (pas à l'import pour les tests)
