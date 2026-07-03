@@ -21,7 +21,7 @@ des matchs). La liste des clubs est dans `scripts/fetch-stats.mjs` (constante `C
 
 ## Comment marche le site
 
-- `benin-boyz-fc-dashboard-1.html` lit `data.json` au chargement. Si `data.json`
+- `index.html` lit `data.json` au chargement. Si `data.json`
   manque, il retombe sur des données intégrées (fallback). Le rendu ne plante pas
   si un champ manque (affiche `—`).
 - `data.json` = les stats, structure multi-clubs `{ updated, platform, clubs:[{name,

@@ -5,7 +5,7 @@ Multi-clubs : vue par club + vue **Overall** (cumul, joueurs fusionnés par nom)
 
 ## Comment ça marche
 
-- `benin-boyz-fc-dashboard-1.html` — le dashboard. Au chargement il lit `data.json`.
+- `index.html` — le dashboard. Au chargement il lit `data.json`.
   S'il est absent (ex. ouverture en `file://`), il retombe sur des données intégrées.
 - `data.json` — les stats, structure multi-clubs `{updated, platform, clubs:[{name,
   clubId, players:[…]}]}`. **Généré**, ne pas éditer à la main.
