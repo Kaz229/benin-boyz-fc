@@ -29,6 +29,7 @@
   .crest{width:42px;height:48px;flex:none;position:relative;border-radius:6px 6px 22px 22px/6px 6px 30px 30px;background:linear-gradient(180deg,#0e2a1f,#0a1c15);border:1.5px solid var(--gold2);display:grid;place-items:center;box-shadow:0 4px 16px rgba(0,0,0,.4);overflow:hidden}
   .crest::before{content:"";position:absolute;left:0;top:0;bottom:0;width:32%;background:var(--green)}
   .crest span{position:relative;font-family:'Anton';font-size:19px;color:var(--gold1);text-shadow:0 1px 2px rgba(0,0,0,.5)}
+  .crest img{position:relative;width:100%;height:100%;object-fit:contain;padding:2px}
   .club-name{font-family:'Barlow Condensed';font-weight:700;font-size:22px;letter-spacing:.5px;line-height:1;text-transform:uppercase}
   .club-sub{font-size:11px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-top:3px}
   .tag{margin-left:auto;font-family:'Barlow Condensed';font-weight:700;font-size:13px;letter-spacing:1px;color:#07120f;background:linear-gradient(180deg,var(--gold1),var(--gold2));padding:5px 11px;border-radius:100px;text-transform:uppercase;white-space:nowrap}
@@ -101,7 +102,8 @@
   .card-ovr .flag .yr{flex:1;display:flex;flex-direction:column}
   .card-ovr .flag .yr .y{flex:1;background:#FCD116}
   .card-ovr .flag .yr .r{flex:1;background:#E8112D}
-  .avatar{margin-left:auto;width:92px;height:92px;border-radius:50%;background:radial-gradient(circle at 50% 35%,rgba(255,255,255,.55),rgba(0,0,0,.12));display:grid;place-items:center;font-family:'Anton';font-size:34px;box-shadow:inset 0 0 0 2px rgba(0,0,0,.14)}
+  .avatar{margin-left:auto;width:92px;height:92px;border-radius:50%;background:radial-gradient(circle at 50% 35%,rgba(255,255,255,.55),rgba(0,0,0,.12));display:grid;place-items:center;font-family:'Anton';font-size:34px;box-shadow:inset 0 0 0 2px rgba(0,0,0,.14);overflow:hidden}
+  .avatar img{width:100%;height:100%;border-radius:inherit;object-fit:cover;display:block}
   .card-name{position:relative;z-index:1;font-family:'Barlow Condensed';font-weight:700;font-size:28px;letter-spacing:.5px;text-transform:uppercase;text-align:center;margin:14px 0 12px;border-bottom:2px solid rgba(0,0,0,.22);padding-bottom:12px;line-height:1}
   .card-mini{position:relative;z-index:1;display:grid;grid-template-columns:repeat(3,1fr);gap:6px;text-align:center}
   .card-mini .cv{font-family:'Anton';font-size:22px;line-height:1}
@@ -175,7 +177,7 @@
 
 <header class="topbar">
   <div class="topbar-in">
-    <div class="crest"><span id="crestTxt">BB</span></div>
+    <div class="crest" id="crestBox"><span id="crestTxt">BB</span></div>
     <div>
       <div class="club-name" id="clubName">Bénin Boyz FC</div>
       <div class="club-sub">EA Sports FC · Pro Clubs</div>
@@ -251,6 +253,10 @@ const initials2 = s => (s||"").trim().split(/\s+/).map(w=>w[0]||"").join("").sli
 const ALIASES = { "Kaz229":"Kaz_229_" };
 const canon = n => ALIASES[n] || n;
 
+// Logos de club (blason). Avatars joueurs : assets/avatars/<pseudo canonique>.png
+const CLUB_LOGOS = { "Bénin Boyz FC":"assets/logo-benin.png", "Aupiais FC":"assets/logo-aupiais.png" };
+const avatarHTML = p => `<div class="avatar"><img src="assets/avatars/${encodeURIComponent(p.name)}.png" alt="" loading="lazy" onerror="this.parentNode.textContent='${initials(p.name)}'"></div>`;
+
 // Fusionne une liste de joueurs par nom canonique (totaux additionnés,
 // taux au prorata des matchs, OVR = max, forme cumulée).
 function mergeByName(players){
@@ -287,7 +293,10 @@ function renderClubBar(){
     `<button class="clubtab ${String(state.club)===it.key?'on':''}" data-club="${it.key}">${it.label}</button>`).join('');
   const isAll=state.club==='all';
   document.getElementById('clubName').textContent=isAll?"Tous les clubs":(CLUBS[state.club]?.name||"Club");
-  document.getElementById('crestTxt').textContent=isAll?"★":initials2(CLUBS[state.club]?.name||"");
+  const nm=isAll?"":(CLUBS[state.club]?.name||""), logo=!isAll&&CLUB_LOGOS[nm], fb=isAll?"★":initials2(nm);
+  document.getElementById('crestBox').innerHTML = logo
+    ? `<img src="${logo}" alt="${nm}" onerror="this.parentNode.innerHTML='<span>${fb}</span>'">`
+    : `<span>${fb}</span>`;
   document.getElementById('memberTag').textContent=PLAYERS.length+" membres";
   document.getElementById('footNote').innerHTML=isAll
     ? `Vue cumulée sur ${CLUBS.length} clubs · les joueurs présents dans plusieurs clubs sont fusionnés (totaux additionnés, taux au prorata des matchs).`
@@ -366,7 +375,7 @@ function cardHTML(p,actions){
     <div class="card-top">
       <div class="card-ovr"><span class="n">${p.ovr}</span><span class="p">${p.pos.slice(0,3).toUpperCase()}</span>
         <span class="flag" aria-label="Bénin"><span class="g"></span><span class="yr"><span class="y"></span><span class="r"></span></span></span></div>
-      <div class="avatar">${initials(p.name)}</div>
+      ${avatarHTML(p)}
     </div>
     <div class="card-name">${p.name}</div>
     <div class="card-mini">
