@@ -3,6 +3,9 @@
 Dashboard des stats Pro Clubs (EA Sports FC 26), hébergé en page statique.
 Multi-clubs : vue par club + vue **Overall** (cumul, joueurs fusionnés par nom).
 
+**Site en ligne : https://kaz229.github.io/benin-boyz-fc/**
+(GitHub Pages, branche `main` / racine ; se met à jour à chaque push de `data.json`.)
+
 ## Comment ça marche
 
 - `index.html` — le dashboard. Au chargement il lit `data.json`.
