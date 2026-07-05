@@ -15,6 +15,11 @@ un joueur présent dans les 2 clubs est fusionné : totaux additionnés, taux au
 des matchs). La liste des clubs est dans `scripts/fetch-stats.mjs` (constante `CLUBS`)
 — pour en ajouter/retirer un, éditer ce tableau.
 
+**Alias de pseudos** : si un même joueur a deux pseudos EA (ex. `Kaz229` = `Kaz_229_`),
+c'est géré dans `index.html` par la constante `ALIASES` (`{"Kaz229":"Kaz_229_"}`).
+Les stats sont alors fusionnées partout (dans un club et en Overall). Ajouter une
+entrée `"autrePseudo":"pseudoCanonique"` pour un nouveau cas.
+
 > Retrouver un clubId : ouvrir dans le navigateur
 > `https://proclubs.ea.com/api/fc/allTimeLeaderboard/search?platform=common-gen5&clubName=NOM`
 > (l'ancien `clubs/search` renvoie 404 sur FC 26).

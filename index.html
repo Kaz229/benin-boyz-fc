@@ -246,17 +246,21 @@ const state = {tab:"players", club:0, sel:0, perMatch:false, metric:"goals", cmp
    ou "all" pour la vue cumulée. PLAYERS est recalculé à chaque changement. */
 const initials2 = s => (s||"").trim().split(/\s+/).map(w=>w[0]||"").join("").slice(0,2).toUpperCase() || "??";
 
-function mergeClubs(clubs){
+/* Pseudos EA différents mais même joueur -> nom canonique.
+   Appliqué partout (dans un club ET en Overall) pour ne compter qu'une fois. */
+const ALIASES = { "Kaz229":"Kaz_229_" };
+const canon = n => ALIASES[n] || n;
+
+// Fusionne une liste de joueurs par nom canonique (totaux additionnés,
+// taux au prorata des matchs, OVR = max, forme cumulée).
+function mergeByName(players){
   const SUMS=['gp','goals','assists','passes','tackles','motm','reds'];
   const RATES=['passpct','tklpct','winpct','shotpct','rating'];
   const byName=new Map();
-  clubs.forEach(c=>(c.players||[]).forEach(p=>{
-    if(!byName.has(p.name)) byName.set(p.name,[]);
-    byName.get(p.name).push(p);
-  }));
+  (players||[]).forEach(p=>{ const k=canon(p.name); if(!byName.has(k)) byName.set(k,[]); byName.get(k).push(p); });
   const out=[];
   byName.forEach((list,name)=>{
-    if(list.length===1){ out.push({...list[0]}); return; }
+    if(list.length===1){ out.push({...list[0], name}); return; } // name = pseudo canonique
     const o={name};
     SUMS.forEach(k=> o[k]=list.reduce((s,p)=>s+(p[k]||0),0));
     const tot=o.gp||0;
@@ -271,7 +275,8 @@ function mergeClubs(clubs){
 }
 
 function applyClub(){
-  PLAYERS = state.club==='all' ? mergeClubs(CLUBS) : (CLUBS[state.club]?.players||[]);
+  const src = state.club==='all' ? CLUBS.flatMap(c=>c.players||[]) : (CLUBS[state.club]?.players||[]);
+  PLAYERS = mergeByName(src); // fusionne aussi les alias au sein d'un même club
   const n=PLAYERS.length||1;
   state.sel=Math.min(state.sel,n-1); state.cmpA=Math.min(state.cmpA,n-1); state.cmpB=Math.min(state.cmpB,n-1);
 }
