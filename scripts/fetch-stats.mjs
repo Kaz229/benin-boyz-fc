@@ -75,7 +75,10 @@ export function mapMember(m) {
     shotpct:  pct(m.shotSuccessRate),                  // % de tirs réussis
     motm:     num(m.manOfTheMatch),                    // hommes du match
     reds:     num(m.redCards),                         // cartons rouges
-    form:     Array.from({ length: 10 }, (_, i) => num(m["prevGoals" + (i + 1)])), // buts, 10 derniers matchs
+    // Indice de forme EA sur les 10 derniers matchs (prevGoalsN). Malgré son nom,
+    // ce n'est pas fiable comme "buts par match" (valeurs bien trop hautes pour les
+    // joueurs à gros volume) — traité comme un indice relatif, pas un nombre de buts.
+    form:     Array.from({ length: 10 }, (_, i) => num(m["prevGoals" + (i + 1)])),
   };
 }
 

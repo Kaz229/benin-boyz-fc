@@ -454,7 +454,10 @@ function animateCountUp(){
   });
 }
 
-// Met en avant le joueur le plus "chaud" (le plus de buts sur les 10 derniers matchs).
+// Met en avant le joueur avec l'indice de forme le plus élevé sur ses 10 derniers matchs.
+// NB : le champ EA source (prevGoalsN) n'est pas fiable en tant que "buts par match"
+// (valeurs bien trop élevées pour des joueurs à gros volume) — on l'affiche donc comme
+// un simple indice relatif, sans prétendre que c'est un nombre de buts.
 function topForm(p){ return (p.form||[]).reduce((s,v)=>s+v,0); }
 function renderSpotlight(){
   const el=document.getElementById('spotlight');
@@ -462,7 +465,7 @@ function renderSpotlight(){
   const hot=PLAYERS.slice().sort((a,b)=>topForm(b)-topForm(a))[0];
   const g=topForm(hot);
   el.innerHTML = g>0
-    ? `<span class="spot-ico">🔥</span><span>En feu : <b>${hot.name}</b> — ${g} but${g>1?'s':''} sur les 10 derniers matchs</span>`
+    ? `<span class="spot-ico">🔥</span><span>En feu : <b>${hot.name}</b> — indice de forme ${g} sur les 10 derniers matchs</span>`
     : `<span class="spot-ico">🏆</span><span>Club de <b>${PLAYERS.length}</b> joueurs, prêts à en découdre</span>`;
 }
 
@@ -492,10 +495,10 @@ function sparklineSVG(form){
   const mx=Math.max(1,...f),W=248,H=74,gap=6,n=f.length,bw=(W-gap*(n-1))/n;
   const bars=f.map((v,i)=>{
     const h=Math.max(2,Math.round(v/mx*(H-18))),x=i*(bw+gap),y=H-h;
-    return `<g><title>${v} but(s)</title><rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${bw.toFixed(1)}" height="${h}" rx="2" fill="url(#spark)"/>`+
+    return `<g><title>Indice de forme : ${v}</title><rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${bw.toFixed(1)}" height="${h}" rx="2" fill="url(#spark)"/>`+
       `<text x="${(x+bw/2).toFixed(1)}" y="${(y-4).toFixed(1)}" fill="#94aaa1" font-size="9" font-family="Barlow Condensed" font-weight="600" text-anchor="middle">${v||''}</text></g>`;
   }).join('');
-  return `<svg width="100%" viewBox="0 0 ${W} ${H}" role="img" aria-label="Buts sur les 10 derniers matchs" style="display:block">
+  return `<svg width="100%" viewBox="0 0 ${W} ${H}" role="img" aria-label="Indice de forme sur les 10 derniers matchs" style="display:block">
     <defs><linearGradient id="spark" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffd76b"/><stop offset="1" stop-color="#00c766"/></linearGradient></defs>${bars}</svg>
     <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--muted2);letter-spacing:1px;text-transform:uppercase;margin-top:4px"><span>+ ancien</span><span>+ récent</span></div>`;
 }
@@ -565,7 +568,7 @@ function renderPlayers(){
           <div class="chips" style="justify-content:center">${hls}</div>
         </div>
         <div class="panel-card" style="margin-top:18px">
-          <div class="grp-title">Forme · buts sur 10 matchs</div>
+          <div class="grp-title">Forme · indice sur 10 matchs</div>
           ${sparklineSVG(p.form)}
         </div>
       </div>
