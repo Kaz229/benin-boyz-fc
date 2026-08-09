@@ -208,6 +208,7 @@
   .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
   .hl{font-family:'Barlow Condensed';font-weight:700;font-size:13px;letter-spacing:.5px;padding:6px 11px;border-radius:100px;background:rgba(0,166,81,.14);border:1px solid rgba(0,166,81,.4);color:var(--green-soft)}
   .hl.gold{background:rgba(211,162,63,.15);border-color:rgba(211,162,63,.5);color:var(--gold1)}
+  .hl.neg{background:rgba(255,51,85,.14);border-color:rgba(255,51,85,.45);color:#ff8fa3}
 
   .lb-metrics{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;-webkit-overflow-scrolling:touch}
   .lb-metrics button{font-family:'Barlow Condensed';font-weight:600;font-size:14px;letter-spacing:.5px;white-space:nowrap;padding:8px 13px;border-radius:100px;border:1px solid var(--line);background:var(--panel);color:var(--muted);cursor:pointer;transition:.15s}
@@ -503,13 +504,56 @@ function sparklineSVG(form){
     <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--muted2);letter-spacing:1px;text-transform:uppercase;margin-top:4px"><span>+ ancien</span><span>+ récent</span></div>`;
 }
 
+// Palette de tags de personnalité par joueur : classements (top / dernier du club)
+// + seuils absolus sur les stats, mélangeant volontairement du positif et du négatif.
+const worstRankOf=(p,key)=>{const v=val(p,key,false);return PLAYERS.filter(x=>val(x,key,false)<v).length+1;};
+
+const RANK_SPECS=[
+  {key:"goals",  top1:"👑 Avant-centre providentiel", top3:"🎯 Fin renard des surfaces", worst1:"🥖 Boulanger en série", worst3:"😶 Discret devant le but", minGp:5},
+  {key:"assists",top1:"🎼 Chef d'orchestre",           top3:"🍽️ Distributeur de caviars", worst1:"🕶️ Vision tunnel",     worst3:"🎯 Dernière passe à travailler", minGp:5},
+  {key:"passes", top1:"🧭 Métronome absolu",           top3:"🔁 Grand relanceur", minGp:5},
+  {key:"tackles",top1:"🧱 Mur infranchissable",        top3:"🛡️ Sentinelle défensive", minGp:5},
+  {key:"winpct", top1:"🍀 Porte-bonheur du vestiaire", top3:"📈 Machine à gagner", worst1:"🌧️ Aimant à défaites", worst3:"📉 Série compliquée", minGp:5},
+  {key:"ovr",    top1:"💎 Joyau du club",              top3:"🌟 Cadre incontournable"},
+  {key:"rating", top1:"🎯 Régularité métronomique",    top3:"✅ Toujours au niveau", worst1:"😓 Passage à vide", minGp:5},
+  {key:"motm",   top1:"🎤 Idole des tribunes",         top3:"❤️ Chouchou du vestiaire", worst1:"🫥 Grand oublié des trophées", minGp:15},
+];
+const THRESH_SPECS=[
+  {test:p=>p.gp>=5 && p.passpct>=85,               txt:"🎯 Précision suisse à la passe", tone:"pos", pr:1},
+  {test:p=>p.gp>=5 && p.passpct<=65,                txt:"🎲 Passes à la loterie",          tone:"neg", pr:1},
+  {test:p=>p.gp>=5 && p.tklpct>=35,                 txt:"🔧 Tacle chirurgical",            tone:"pos", pr:1},
+  {test:p=>p.gp>=5 && p.tklpct<=10,                 txt:"🪓 Tacle en carton",              tone:"neg", pr:1},
+  {test:p=>p.gp>=10 && p.goals>0 && p.shotpct>=45,  txt:"🔫 Réalisme frappant",            tone:"pos", pr:1},
+  {test:p=>p.gp>=10 && p.goals>0 && p.shotpct<=15,  txt:"🌀 Maladresse chronique",         tone:"neg", pr:1},
+  {test:p=>p.reds>=2,                               txt:"🟥 Sale caractère",               tone:"neg", pr:1},
+  {test:p=>p.reds===1 && p.gp<30,                   txt:"😤 Nerfs à fleur de peau",        tone:"neg", pr:2},
+  {test:p=>p.gp>=10 && p.goals===0,                 txt:"🔍 Toujours à la recherche du premier but", tone:"neg", pr:2},
+  {test:p=>p.gp>=1 && p.gp<=8 && (p.goals/p.gp)>=0.6, txt:"🚀 Étoile montante",            tone:"pos", pr:2},
+  {test:p=>p.gp>=200,                               txt:"🏛️ Pilier historique du club",   tone:"pos", pr:2},
+  {test:p=>p.gp>0 && p.gp<=3,                       txt:"🌱 Encore en rodage",             tone:"pos", pr:2},
+];
+const FILLER_TAGS=["🧩 Solide au quotidien","🤝 Joueur d'équipe fiable","🧘 Présence rassurante dans l'effectif","🏃 Toujours partant","🔩 Le sérieux avant tout","🧽 Sans fioritures, efficace","⚖️ Profil équilibré","🕵️ Discret mais utile"];
+const hashStr=s=>{let h=7;for(const c of s)h=(h*31+c.charCodeAt(0))|0;return Math.abs(h);};
+
 function highlights(p){
-  const specs=[["goals","Meilleur buteur","Top buteur"],["assists","Meilleur passeur","Top passeur"],["passes","Maître à la relance","Top relanceur"],["tackles","Mur défensif","Top défenseur"],["winpct","Roi des victoires","Top % victoires"],["ovr","Meilleure note","Top note"],["rating","Régularité d'élite","Top régularité"],["motm","Chouchou du public","Top hommes du match"]];
   const out=[];
-  specs.forEach(([k,n1,n])=>{const r=rankOf(p,k,false);if(r<=3)out.push({r,txt:r===1?n1:n,gold:r===1});});
-  if(p.gp>=10){const r=rankOf(p,"goals",true);if(r<=3)out.push({r:r+.5,txt:r===1?"Efficacité redoutable":"Top efficacité",gold:r===1});}
-  out.sort((a,b)=>a.r-b.r);
-  if(!out.length)out.push({txt:"Profil polyvalent",gold:false});
+  RANK_SPECS.forEach(spec=>{
+    if(spec.minGp && p.gp<spec.minGp) return;
+    const r=rankOf(p,spec.key,false);
+    if(r===1 && spec.top1) out.push({txt:spec.top1,tone:"gold",pr:0});
+    else if(r<=3 && spec.top3) out.push({txt:spec.top3,tone:"pos",pr:1});
+    if(spec.worst1 || spec.worst3){
+      const wr=worstRankOf(p,spec.key);
+      if(wr===1 && spec.worst1 && r!==1) out.push({txt:spec.worst1,tone:"neg",pr:1});
+      else if(wr<=3 && spec.worst3 && r>3) out.push({txt:spec.worst3,tone:"neg",pr:2});
+    }
+  });
+  THRESH_SPECS.forEach(s=>{ if(s.test(p)) out.push({txt:s.txt,tone:s.tone,pr:s.pr}); });
+  out.sort((a,b)=>a.pr-b.pr);
+  if(out.length<2){
+    const h=hashStr(p.name);
+    [0,1].forEach(i=>{ const txt=FILLER_TAGS[(h+i*3)%FILLER_TAGS.length]; if(!out.some(o=>o.txt===txt)) out.push({txt,tone:"pos",pr:9}); });
+  }
   return out.slice(0,4);
 }
 
@@ -556,7 +600,7 @@ function renderPlayers(){
     }).join('');
     return `<div class="panel-card"><div class="grp-title">${g.title}</div>${rows}</div>`;
   }).join('');
-  const hls=highlights(p).map(h=>`<span class="hl ${h.gold?'gold':''}">${h.txt}</span>`).join('');
+  const hls=highlights(p).map(h=>`<span class="hl ${h.tone==='gold'?'gold':h.tone==='neg'?'neg':''}">${h.txt}</span>`).join('');
   document.getElementById('view').innerHTML=`
     <div class="sec-label"><h2>Choisis ton joueur</h2><div class="rule"></div>${modeToggle()}</div>
     ${pickerHTML(state.sel)}
