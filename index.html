@@ -51,11 +51,34 @@
   .tab.active{color:#07120f;background:linear-gradient(180deg,var(--gold1),var(--gold2))}
   .tab:focus-visible{outline:2px solid var(--green-soft);outline-offset:2px}
 
-  .clubbar{display:flex;gap:6px;margin:18px 0 2px;background:var(--panel);border:1px solid var(--line);border-radius:100px;padding:5px}
+  .clubbar{display:flex;gap:6px;margin:18px 0 2px;background:var(--panel);border:1px solid var(--line);border-radius:100px;padding:5px;flex-wrap:wrap}
   .clubtab{flex:1;font-family:'Barlow Condensed';font-weight:700;font-size:14px;letter-spacing:1px;text-transform:uppercase;padding:9px 8px;border-radius:100px;background:none;border:none;color:var(--muted);cursor:pointer;transition:.15s;white-space:nowrap}
   .clubtab:hover{color:var(--text)}
   .clubtab.on{color:#07120f;background:linear-gradient(180deg,var(--green-soft),var(--green))}
   .clubtab:focus-visible{outline:2px solid var(--green-soft);outline-offset:2px}
+  .clubtab-add{flex:none;font-family:'Barlow Condensed';font-weight:700;font-size:18px;padding:6px 13px;border-radius:100px;background:none;border:1px solid var(--line);color:var(--muted);cursor:pointer;transition:.15s;line-height:1}
+  .clubtab-add:hover{color:var(--green-soft);border-color:var(--green)}
+
+  .search-panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;margin:8px 0 0;display:none}
+  .search-panel.open{display:block}
+  .search-panel h3{font-family:'Barlow Condensed';font-weight:700;font-size:13px;letter-spacing:2.5px;text-transform:uppercase;color:var(--green-soft);margin-bottom:12px}
+  .search-row{display:flex;gap:8px;flex-wrap:wrap}
+  .search-input{flex:1;min-width:140px;font-family:'Barlow Condensed';font-weight:600;font-size:16px;padding:10px 14px;border-radius:10px;border:1px solid var(--line-strong);background:#0a1c15;color:var(--text);outline:none;transition:.15s}
+  .search-input:focus{border-color:var(--green)}
+  .search-input::placeholder{color:var(--muted2)}
+  .search-sel{font-family:'Barlow Condensed';font-weight:600;font-size:14px;padding:10px 10px;border-radius:10px;border:1px solid var(--line-strong);background:#0a1c15;color:var(--muted);cursor:pointer;outline:none}
+  .search-sel:focus{border-color:var(--green)}
+  .btn-search{font-family:'Barlow Condensed';font-weight:700;font-size:15px;letter-spacing:1px;text-transform:uppercase;padding:10px 20px;border-radius:10px;border:none;background:linear-gradient(180deg,var(--green-soft),var(--green));color:#07120f;cursor:pointer;white-space:nowrap;transition:.15s}
+  .btn-search:disabled{opacity:.5;cursor:default}
+  .search-results{margin-top:10px;display:flex;flex-direction:column;gap:6px}
+  .search-result-item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 14px;border-radius:10px;border:1px solid var(--line);background:#0a1c15;cursor:pointer;transition:.15s}
+  .search-result-item:hover{border-color:var(--green);background:#0e2218}
+  .search-result-name{font-family:'Barlow Condensed';font-weight:700;font-size:17px}
+  .search-result-id{font-size:11px;color:var(--muted);letter-spacing:1px}
+  .search-result-btn{font-family:'Barlow Condensed';font-weight:700;font-size:12px;letter-spacing:1px;text-transform:uppercase;padding:6px 12px;border-radius:8px;border:none;background:linear-gradient(180deg,var(--green-soft),var(--green));color:#07120f;cursor:pointer;white-space:nowrap}
+  .search-msg{font-size:13px;color:var(--muted);padding:8px 0}
+  .search-msg.err{color:#ff6b6b}
+
   footer{margin-top:34px;padding-top:18px;border-top:1px solid var(--line);color:var(--muted2);font-size:12px;line-height:1.6}
 
   .seg{display:inline-flex;background:var(--panel);border:1px solid var(--line);border-radius:100px;padding:4px;gap:2px}
@@ -191,7 +214,23 @@
     <div class="eyebrow">Statistiques du club</div>
     <h1>Chaque<br><em>joueur</em>, sa carte</h1>
     <p>Profils, classements et comparaisons. Bascule entre totaux carrière et moyenne par match.</p>
-    <div class="clubbar" id="clubBar"></div>
+    <div style="display:flex;align-items:center;gap:6px">
+      <div class="clubbar" id="clubBar"></div>
+      <button class="clubtab-add" id="searchToggle" title="Rechercher un club" aria-expanded="false">+</button>
+    </div>
+    <div class="search-panel" id="searchPanel" aria-label="Recherche de club">
+      <h3>Rechercher un club EA Pro Clubs</h3>
+      <div class="search-row">
+        <input class="search-input" id="searchInput" type="search" placeholder="Nom du club…" autocomplete="off" maxlength="60">
+        <select class="search-sel" id="platformSel">
+          <option value="common-gen5">PS5 / Xbox Series</option>
+          <option value="common-gen4">PS4 / Xbox One</option>
+          <option value="pc">PC</option>
+        </select>
+        <button class="btn-search" id="searchBtn">Rechercher</button>
+      </div>
+      <div class="search-results" id="searchResults"></div>
+    </div>
     <div class="team-strip" id="teamStrip"></div>
   </section>
 
@@ -515,6 +554,158 @@ function exportCard(btn){
     btn.textContent="Carte téléchargée ✓";setTimeout(()=>btn.textContent=orig,2200);
   }).catch(()=>{btn.textContent="Échec, réessaie";setTimeout(()=>btn.textContent=orig,2200);});
 }
+
+/* ---- Recherche de club ---------------------------------------------------
+   Appelle l'API EA directement depuis le navigateur.
+   L'API EA peut bloquer les requêtes selon la région/IP ; un message clair
+   est affiché dans ce cas. */
+
+const EA_BASE = "https://proclubs.ea.com/api/fc";
+const EA_HEADERS = { "Accept": "application/json" };
+
+const POS_FR_MAP = { goalkeeper:"Gardien", defender:"Défenseur", midfielder:"Milieu", forward:"Attaquant" };
+const numV = v => { const n = Number(v); return Number.isFinite(n) ? n : 0; };
+const pctV = v => Math.round(numV(v));
+
+function mapMemberBrowser(m) {
+  return {
+    name:    m.name,
+    pos:     POS_FR_MAP[m.favoritePosition] || "Milieu",
+    ovr:     numV(m.proOverall),
+    gp:      numV(m.gamesPlayed),
+    goals:   numV(m.goals),
+    assists: numV(m.assists),
+    passes:  numV(m.passesMade),
+    passpct: pctV(m.passSuccessRate),
+    tackles: numV(m.tacklesMade),
+    tklpct:  pctV(m.tackleSuccessRate),
+    winpct:  pctV(m.winRate),
+    rating:  Math.round(numV(m.ratingAve) * 10) / 10,
+    shotpct: pctV(m.shotSuccessRate),
+    motm:    numV(m.manOfTheMatch),
+    reds:    numV(m.redCards),
+    form:    Array.from({length:10}, (_,i) => numV(m["prevGoals"+(i+1)])),
+  };
+}
+
+async function eaGet(path) {
+  const res = await fetch(`${EA_BASE}/${path}`, { headers: EA_HEADERS });
+  if (!res.ok) throw new Error(`EA ${res.status}`);
+  return res.json();
+}
+
+async function searchEAClubs(name, platform) {
+  return eaGet(`clubs/search?platform=${platform}&clubName=${encodeURIComponent(name)}`);
+}
+
+async function loadClubById(clubId, clubName, platform) {
+  const data = await eaGet(`members/stats?platform=${platform}&clubId=${clubId}`);
+  const members = data.members || data.Members || [];
+  if (!members.length) throw new Error("Aucun membre trouvé pour ce club.");
+  const players = members
+    .map(mapMemberBrowser)
+    .filter(p => p.name && p.gp > 0)
+    .sort((a, b) => a.name.localeCompare(b.name, "fr"));
+  return { name: clubName, clubId: String(clubId), players };
+}
+
+function setSearchMsg(msg, isErr) {
+  const el = document.getElementById("searchResults");
+  el.innerHTML = `<div class="search-msg${isErr?" err":""}">${msg}</div>`;
+}
+
+async function runSearch() {
+  const name = document.getElementById("searchInput").value.trim();
+  const platform = document.getElementById("platformSel").value;
+  const btn = document.getElementById("searchBtn");
+  const results = document.getElementById("searchResults");
+  if (!name) return;
+
+  btn.disabled = true;
+  btn.textContent = "Recherche…";
+  results.innerHTML = "";
+
+  try {
+    const data = await searchEAClubs(name, platform);
+    // L'API renvoie un objet dont les valeurs sont les clubs
+    const clubs = Array.isArray(data) ? data : Object.values(data);
+    if (!clubs.length) { setSearchMsg("Aucun club trouvé."); return; }
+
+    results.innerHTML = clubs.slice(0, 10).map(c => {
+      const cName = c.name || c.clubName || "Club";
+      const cId   = c.clubId || c.ClubId || "";
+      return `<div class="search-result-item" data-club-id="${cId}" data-club-name="${cName.replace(/"/g,'&quot;')}" data-platform="${platform}">
+        <div>
+          <div class="search-result-name">${cName}</div>
+          <div class="search-result-id">ID : ${cId} · ${platform}</div>
+        </div>
+        <button class="search-result-btn">Charger</button>
+      </div>`;
+    }).join("");
+  } catch(e) {
+    const isCors = e instanceof TypeError;
+    setSearchMsg(
+      isCors
+        ? "L'API EA a bloqué la requête (CORS). Lance le script <code>node scripts/fetch-stats.mjs</code> en local pour récupérer les stats."
+        : `Erreur : ${e.message}`,
+      true
+    );
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Rechercher";
+  }
+}
+
+async function handleLoadClub(clubId, clubName, platform) {
+  const results = document.getElementById("searchResults");
+  // Déjà chargé ?
+  const existing = CLUBS.findIndex(c => c.clubId === String(clubId));
+  if (existing >= 0) {
+    state.club = existing;
+    applyClub(); render();
+    document.getElementById("searchPanel").classList.remove("open");
+    document.getElementById("searchToggle").setAttribute("aria-expanded","false");
+    return;
+  }
+
+  results.innerHTML = `<div class="search-msg">Chargement des stats de <b>${clubName}</b>…</div>`;
+  try {
+    const club = await loadClubById(clubId, clubName, platform);
+    CLUBS.push(club);
+    state.club = CLUBS.length - 1;
+    applyClub(); render();
+    document.getElementById("searchPanel").classList.remove("open");
+    document.getElementById("searchToggle").setAttribute("aria-expanded","false");
+  } catch(e) {
+    const isCors = e instanceof TypeError;
+    setSearchMsg(
+      isCors
+        ? "L'API EA a bloqué la requête (CORS). Ajoute ce club dans <code>fetch-stats.mjs</code> et relance le script en local."
+        : `Erreur : ${e.message}`,
+      true
+    );
+  }
+}
+
+// Événements du panneau de recherche
+document.getElementById("searchToggle").addEventListener("click", () => {
+  const panel = document.getElementById("searchPanel");
+  const open = panel.classList.toggle("open");
+  document.getElementById("searchToggle").setAttribute("aria-expanded", String(open));
+  if (open) document.getElementById("searchInput").focus();
+});
+
+document.getElementById("searchBtn").addEventListener("click", runSearch);
+
+document.getElementById("searchInput").addEventListener("keydown", e => {
+  if (e.key === "Enter") runSearch();
+});
+
+document.getElementById("searchResults").addEventListener("click", e => {
+  const item = e.target.closest(".search-result-item");
+  if (!item) return;
+  handleLoadClub(item.dataset.clubId, item.dataset.clubName, item.dataset.platform);
+});
 
 async function boot(){
   try{
