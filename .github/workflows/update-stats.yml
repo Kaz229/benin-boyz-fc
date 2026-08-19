@@ -1,9 +1,7 @@
 name: Update stats
 
 on:
-  schedule:
-    - cron: "0 6 * * *"      # tous les jours à 06:00 UTC
-  workflow_dispatch: {}        # + lancement manuel depuis l'onglet Actions
+  workflow_dispatch: {}        # lancement manuel depuis l'onglet Actions
 
 permissions:
   contents: write
